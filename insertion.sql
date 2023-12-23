@@ -14,7 +14,7 @@ VALUES
     (25, 'пр. Перемоги', 'Харків', 'Харківська область'),
     (7, 'вул. Космонавтів', 'Одеса', 'Одеська область');
 
-select * from Address;
+select * from ServiceCenter;
 
 -- Додаємо 10 записів у таблицю ServiceCenter
 INSERT INTO ServiceCenter (phoneNumber, email, addressID)
