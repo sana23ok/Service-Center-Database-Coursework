@@ -13,21 +13,21 @@
 
 ---- tables creation 
 
----- ServiceCenter table
---CREATE TABLE Address (
---    addressID INT IDENTITY(1,1) PRIMARY KEY,
---    streetNumber VARCHAR(10) NOT NULL,
---    street VARCHAR(255) NOT NULL,
---    city VARCHAR(100) NOT NULL,
---    region VARCHAR(100) NOT NULL
---);
+-- ServiceCenter table
+CREATE TABLE Address (
+    addressID INT IDENTITY(1,1) PRIMARY KEY,
+    streetNumber VARCHAR(10) NOT NULL,
+    street VARCHAR(255) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    region VARCHAR(100) NOT NULL
+);
 
---CREATE TABLE ServiceCenter (
---    centerID INT IDENTITY(1,1) PRIMARY KEY,
---    phoneNumber VARCHAR(15),
---    email VARCHAR(255),
---	addressID INT FOREIGN KEY REFERENCES Address(addressID)
---);
+CREATE TABLE ServiceCenter (
+    centerID INT IDENTITY(1,1) PRIMARY KEY,
+    phoneNumber VARCHAR(15),
+    email VARCHAR(255),
+	addressID INT FOREIGN KEY REFERENCES Address(addressID)
+);
 
 CREATE TABLE Position
 (
@@ -36,6 +36,15 @@ CREATE TABLE Position
     salary DECIMAL(10, 2),
     experience INT
 );
+
+ALTER TABLE Position
+ADD CONSTRAINT CHK_PositiveExperience
+CHECK (experience >= 0); 
+
+ALTER TABLE Position
+ADD CONSTRAINT CHK_NonNegativeSalary
+CHECK (salary >= 0); 
+
 
 CREATE TABLE Worker
 (
@@ -114,22 +123,73 @@ CREATE TABLE PracticalExam_TransportVehicle (
     FOREIGN KEY (registrationPlate) REFERENCES TransportVehicle(registrationPlate)
 );
 
--- Trigger to check that examinerID in Exam != instructorID in TransportVehicle
-CREATE TRIGGER CheckExaminerInstructor
-ON TransportVehicle
-AFTER INSERT, UPDATE
-AS
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM inserted i
-        JOIN Exam e ON i.instructorID = e.examinerID
-    )
-    BEGIN
-        RAISEERROR('Examiner ID in Exam must not be equal to Instructor ID in TransportVehicle.', 16, 1);
-        ROLLBACK TRANSACTION;
-    END
-END;
+
+CREATE TABLE Voucher (
+    voucherID INT IDENTITY(1,1) PRIMARY KEY,
+    TIN INT, 
+    datetimeOfReciving DATETIME NOT NULL,
+    centerID INT, 
+    payment DECIMAL(10, 2),
+    fee DECIMAL(10, 2),
+    terms VARCHAR(255),
+	FOREIGN KEY (centerID) REFERENCES ServiceCenter(centerID),
+	FOREIGN KEY (TIN) REFERENCES Candidate(TIN)
+);
+
+-- Add column to Exam table
+ALTER TABLE Exam
+ADD voucherID INT;
+
+-- Add foreign key constraint on voucherID column
+ALTER TABLE Exam
+ADD CONSTRAINT FK_Exam_Voucher
+FOREIGN KEY (voucherID) REFERENCES Voucher(voucherID);
+
+-- Таблиця з теоретичними екзаменами
+CREATE TABLE TheoreticalExam (
+    theoreticalExamID INT IDENTITY(1,1) PRIMARY KEY,
+    examID INT,
+    CONSTRAINT FK_TheoreticalExam_Exam
+        FOREIGN KEY (examID) REFERENCES Exam(examID)
+);
+
+-- Таблиця з запитаннями
+CREATE TABLE Question (
+    questionID INT IDENTITY(1,1) PRIMARY KEY,
+    text NVARCHAR(MAX) NOT NULL
+);
+
+-- Таблиця з відповідями
+CREATE TABLE Answer (
+    answerID INT IDENTITY(1,1) PRIMARY KEY,
+    questionID INT,
+    text NVARCHAR(MAX) NOT NULL,
+    isCorrect BIT, -- Флаг для визначення правильної відповіді
+    CONSTRAINT FK_Answer_Question
+        FOREIGN KEY (questionID) REFERENCES Question(questionID)
+);
+
+-- Таблиця, що встановлює зв'язок між теоретичним екзаменом та запитаннями
+CREATE TABLE TheoreticalExam_Question (
+    theoreticalExamID INT,
+    questionID INT,
+    PRIMARY KEY (theoreticalExamID, questionID),
+    CONSTRAINT FK_TheoreticalExamQuestion_TheoreticalExam
+        FOREIGN KEY (theoreticalExamID) REFERENCES TheoreticalExam(theoreticalExamID),
+    CONSTRAINT FK_TheoreticalExamQuestion_Question
+        FOREIGN KEY (questionID) REFERENCES Question(questionID)
+);
+
+CREATE TABLE DriversLicense (
+    seriesAndNumber VARCHAR(20) PRIMARY KEY,
+    validUntil DATE NOT NULL,
+    issueDate DATE NOT NULL,
+    ownerID INT,
+    category VARCHAR(10) NOT NULL,
+    CONSTRAINT FK_DriversLicense_Owner
+        FOREIGN KEY (ownerID) REFERENCES Candidate(TIN)
+);
+
 
 
 
