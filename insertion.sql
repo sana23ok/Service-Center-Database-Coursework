@@ -89,8 +89,6 @@ VALUES
     (0012556677, 'Kovalenko', 'Khrystyna', '1998-11-19', '+380951567890', 14),
     (0012667788, 'Melnik', 'Mykhailo', '1984-07-26', '+380951678901', 15);
 
-
-
 select * from Position; -- 1 - 11
 select * from ServiceCenter; -- 3 - 11
 select * from Worker;
@@ -260,4 +258,99 @@ JOIN PracticalExam P ON E.examID = P.examID
 WHERE E.result = 'positive';
 
 select * from DriversLicense;
+
+--ALTER TABLE Voucher
+--ADD examDateTime DATETIME;
+
+--ALTER TABLE Voucher
+--ADD ServiceType VARCHAR(20) CHECK (ServiceType IN ('theoretical exam', 
+--													'practical exam', 
+--													'licence reciving'));
+
+select * from Voucher;
+
+EXEC sp_columns 'Voucher';
+
+
+-- Generate 15 vouchers using TIN from the Candidate table
+INSERT INTO Voucher (TIN, datetimeOfReciving, centerID, payment, fee, terms, examDateTime, ServiceType)
+VALUES     
+    (17, '2023-12-20', 9, 33, 300, 'Financial Agreement', DATEADD(DAY, 1, '2023-12-20'), 'practical exam'),
+    (18, '2023-12-20', 1, 33, 300, 'Standard terms', DATEADD(DAY, 1, '2023-12-20'), 'licence reciving'),
+    (19, '2023-12-20', 2, 13, 33, 'Financial Agreement', DATEADD(DAY, 1, '2023-12-20'), 'theoretical exam'),
+    (20, GETDATE(), 3, 33, 300, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'practical exam'),
+    (21, '2023-12-20', 4, 33, 800, 'Standard terms', DATEADD(DAY, 1, '2023-12-20'), 'licence reciving'),
+    (22, GETDATE(), 5, 13, 33, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'theoretical exam'),
+    (23, GETDATE(), 6, 33, 800, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'practical exam'),
+    (24, '2023-12-20', 7, 33, 300, 'Standard terms', DATEADD(DAY, 1, '2023-12-20'), 'licence reciving'),
+    (26, '2023-12-20', 8, 13, 33, 'Standard terms', DATEADD(DAY, 1, '2023-12-20'), 'theoretical exam'),
+    (27, GETDATE(), 9, 33, 300, 'Financial Agreement', DATEADD(DAY, 1, GETDATE()), 'practical exam'),
+    (28, GETDATE(), 1, 33, 300, 'Financial Agreement', DATEADD(DAY, 1, GETDATE()), 'licence reciving'),
+    (31, GETDATE(), 1, 13, 33, 'Financial Agreement', DATEADD(DAY, 1, GETDATE()), 'theoretical exam'),
+    (33, GETDATE(), 3, 33, 300, 'Financial Agreement', DATEADD(DAY, 1, GETDATE()), 'practical exam'),
+    (34, '2023-12-22', 4, 33, 800, 'Standard terms', DATEADD(DAY, 1, '2023-12-22'), 'licence reciving'),
+    (35, '2023-12-22', 5, 13, 33, 'Standard terms', DATEADD(DAY, 1, '2023-12-22'), 'theoretical exam'),
+    (37, '2023-12-22', 4, 33, 800, 'Standard terms', DATEADD(DAY, 1, '2023-12-22'), 'practical exam'),
+    (39, '2023-12-22', 7, 33, 300, 'Standard terms', DATEADD(DAY, 1, '2023-12-22'), 'licence reciving'),
+    (41, GETDATE(), 8, 13, 33, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'theoretical exam'),
+    (42, GETDATE(), 4, 33, 300, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'practical exam'),
+    (46, '2023-12-22', 4, 33, 300, 'Standard terms', DATEADD(DAY, 1, '2023-12-22'), 'licence reciving'),
+    (47, GETDATE(), 4, 33, 300, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'theoretical exam'),
+    (48, GETDATE(), 3, 33, 300, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'practical exam'),
+    (50, GETDATE(), 4, 33, 300, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'licence reciving'),
+    (52, GETDATE(), 5, 33, 800, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'theoretical exam'),
+    (54, GETDATE(), 6, 33, 800, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'practical exam'),
+    (55, GETDATE(), 7, 33, 300, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'licence reciving'),
+    (56, '2023-12-22', 8, 13, 33, 'Standard terms', DATEADD(DAY, 1, '2023-12-22'), 'theoretical exam'),
+    (57, GETDATE(), 9, 33, 300, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'practical exam'),
+    (59, '2023-12-22', 9, 33, 300, 'Standard terms', DATEADD(DAY, 1, '2023-12-22'), 'licence reciving'),
+    (60, GETDATE(), 4, 13, 33, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'theoretical exam'),
+    (61, GETDATE(), 4, 33, 300, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'practical exam'),
+    (63, GETDATE(), 4, 33, 800, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'licence reciving'),
+    (64, GETDATE(), 5, 13, 33, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'theoretical exam'),
+    (66, GETDATE(), 6, 33, 800, 'Standard terms', DATEADD(DAY, 1, GETDATE()), 'practical exam');
+
+
+select * from ServiceCenter;
+select * from Voucher;
+
+CREATE OR ALTER PROCEDURE FillExamsFromVoucher
+AS
+BEGIN
+    -- Заповнення таблиці Exam
+    INSERT INTO Exam (datetimeOfExam, result, examinerID, voucherID)
+    SELECT 
+        V.datetimeOfReciving,
+        NULL, -- За замовчуванням результат не визначений
+        NULL, -- За замовчуванням екзаменатор не визначений
+        V.voucherID
+    FROM Voucher V
+    WHERE V.examDateTime IS NOT NULL;
+
+    -- Заповнення таблиць PracticalExam та TheoreticalExam
+    INSERT INTO PracticalExam (examRoute, examID)
+    SELECT 
+        CASE 
+            WHEN V.ServiceType = 'practical exam' THEN ABS(CHECKSUM(NEWID())) % 10 + 1
+            ELSE NULL
+        END,
+        E.examID
+    FROM Exam E
+    JOIN Voucher V ON V.voucherID = E.voucherID
+    WHERE V.ServiceType = 'practical exam';
+
+    INSERT INTO TheoreticalExam (duration, score, examID)
+    SELECT 
+        NULL, -- За замовчуванням тривалість та бали не визначені
+        NULL,
+        E.examID
+    FROM Exam E
+    JOIN Voucher V ON V.voucherID = E.voucherID
+    WHERE V.ServiceType = 'theoretical exam';
+END;
+
+EXEC FillExamsFromVoucher;
+
+select * from PracticalExam;
+select * from TheoreticalExam;
 

@@ -85,6 +85,14 @@ CREATE TABLE Voucher (
 	FOREIGN KEY (TIN) REFERENCES Candidate(TIN)
 );
 
+ALTER TABLE Voucher
+ADD examDateTime DATETIME;
+
+ALTER TABLE Voucher
+ADD ServiceType VARCHAR(20) CHECK (ServiceType IN ('theoretical exam', 
+													'practical exam', 
+													'licence reciving'));
+
 -- Exam table
 CREATE TABLE Exam (
     examID INT IDENTITY(1,1) PRIMARY KEY,
@@ -95,6 +103,12 @@ CREATE TABLE Exam (
     FOREIGN KEY (examinerID) REFERENCES Worker(workerID),
 	FOREIGN KEY (voucherID) REFERENCES Voucher(voucherID)
 );
+
+ALTER TABLE Exam
+ALTER COLUMN examinerID int NULL;
+
+ALTER TABLE Exam
+ALTER COLUMN result varchar(20) NULL;
 
 -- PracticalExam table
 CREATE TABLE PracticalExam (
