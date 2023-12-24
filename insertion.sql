@@ -354,3 +354,8 @@ EXEC FillExamsFromVoucher;
 select * from PracticalExam;
 select * from TheoreticalExam;
 
+
+
+select * from Exam;
+
+
