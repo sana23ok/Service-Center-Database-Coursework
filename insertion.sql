@@ -13,7 +13,6 @@ VALUES
     (25, 'пр. Перемоги', 'Харків', 'Харківська область'),
     (7, 'вул. Космонавтів', 'Одеса', 'Одеська область');
 
-
 INSERT INTO ServiceCenter (phoneNumber, email, addressID)
 VALUES 
     ('234-567-8901', 'serviceKharkiv@example.com', 2),
@@ -40,9 +39,6 @@ VALUES
     ('Network Support Technician', 42000.00, 2),
 	('Secretary', 40000.00, 2);
 
-select * from Position; -- 1 - 11
-select * from ServiceCenter; -- 3 - 11
-
 INSERT INTO Worker (centerID, drivingSchool, surname, firstname, positionID, phoneNumber, email)
 VALUES 
     (3, NULL, 'Ivanov', 'Oleksandr', 1, '+380951234567', 'oleksandr.ivanov@example.com'),
@@ -56,9 +52,6 @@ VALUES
     (7, NULL, 'Romanova', 'Vladyslava', 9, '+380959012345', 'vlada.romanova@example.com'),
     (NULL, 'Safe Academy', 'Kovalenko', 'Irina', 9, '+380951112233', 'irina.kovalenko@example.com'),
     (8, NULL, 'Karpenko', 'Vasyl', 11, '+380951234567', 'vasyl.karpenko@example.com');
-
-
-select * from Worker;
 
 INSERT INTO MedCard (bloodType, Rh, issueDate)
 VALUES 
@@ -78,25 +71,193 @@ VALUES
     ('B', '-', '2023-02-28'),
     ('O', '+', '2023-03-15');
 
-select * from MedCard; -- 1 - 15
-
--- 10-digit
 INSERT INTO Candidate (TIN, surname, firstname, dateOfBirth, phoneNumber, ownerID)
 VALUES 
-    (123456, 'Poliakova', 'Ludmula', '1990-05-15', '+380951234567', 1),
-    (234567, 'Prohorova', 'Karina', '1988-12-03', '+380952345678', 2),
-    (345678, 'Koval', 'Oleksii', '1995-08-22', '+380953456789', 3),
-    (456789, 'Malynovska', 'Arina', '1992-04-10', '+380954567890', 4),
-    (567890, 'Pavlova', 'Inna', '1987-11-28', '+380955678901', 5),
-    (678901, 'Komarov', 'Dmytro', '1993-09-18', '+380956789012', 6),
-    (789012, 'Chala', 'Lilia', '1989-07-07', '+380957890123', 7),
-    (890123, 'Tkach', 'Diana', '1991-01-25', '+380958901234', 8),
-    (901234, 'Kononenko', 'Volodymyr', '1994-06-12', '+380959012345', 9),
-    (112233, 'Dmytrushyn', 'Iryna', '1996-03-30', '+380951112233', 10),
-    (223344, 'Avramov', 'Vasyl', '1985-10-08', '+380951234567', 11),
-    (334455, 'Ivanova', 'Nataliia', '1997-02-14', '+380951345678', 12),
-    (445566, 'Sokolov', 'Artem', '1986-09-02', '+380951456789', 13),
-    (556677, 'Kovalenko', 'Khrystyna', '1998-11-19', '+380951567890', 14),
-    (667788, 'Melnik', 'Mykhailo', '1984-07-26', '+380951678901', 15);
+    (1234563456, 'Poliakova', 'Ludmula', '1990-05-15', '+380951234567', 1),
+    (2345672525, 'Prohorova', 'Karina', '1988-12-03', '+380952345678', 2),
+    (3456780202, 'Koval', 'Oleksii', '1995-08-22', '+380953456789', 3),
+    (4567891111, 'Malynovska', 'Arina', '1992-04-10', '+380954567890', 4),
+    (5678111190, 'Pavlova', 'Inna', '1987-11-28', '+380955678901', 5),
+    (6111178901, 'Komarov', 'Dmytro', '1993-09-18', '+380956789012', 6),
+    (7890111112, 'Chala', 'Lilia', '1989-07-07', '+380957890123', 7),
+    (8911110123, 'Tkach', 'Diana', '1991-01-25', '+380958901234', 8),
+    (9012311114, 'Kononenko', 'Volodymyr', '1994-06-12', '+380959012345', 9),
+    (1121111233, 'Dmytrushyn', 'Iryna', '1996-03-30', '+380951112233', 10),
+    (0111223344, 'Avramov', 'Vasyl', '1985-10-08', '+380951234567', 11),
+    (3111134455, 'Ivanova', 'Nataliia', '1997-02-14', '+380951345678', 12),
+    (0011445566, 'Sokolov', 'Artem', '1986-09-02', '+380951456789', 13),
+    (0012556677, 'Kovalenko', 'Khrystyna', '1998-11-19', '+380951567890', 14),
+    (0012667788, 'Melnik', 'Mykhailo', '1984-07-26', '+380951678901', 15);
 
+
+
+select * from Position; -- 1 - 11
+select * from ServiceCenter; -- 3 - 11
+select * from Worker;
+select * from MedCard; -- 1 - 15
+select * from Candidate; -- 1 - 15
+
+
+-- Generate 15 vouchers using TIN from the Candidate table
+INSERT INTO Voucher (TIN, datetimeOfReciving, centerID, payment, fee, terms)
+VALUES 
+    (1234563456, GETDATE(), 3, 13, 20, 'Standard terms'),
+    (2345672525, GETDATE(), 3, 13, 20, 'Standard terms'),
+    (3456780202, GETDATE(), 3, 13, 20, 'Standard terms'),
+    (4567891111, GETDATE(), 3, 13, 20, 'Standard terms'),
+    (5678111190, GETDATE(), 4, 33, 800, 'Standard terms'),
+    (6111178901, GETDATE(), 4, 33, 800, 'Standard terms'),
+    (7890111112, GETDATE(), 4, 33, 300, 'Standard terms'),
+    (8911110123, GETDATE(), 5, 33, 800, 'Standard terms'),
+    (9012311114, GETDATE(), 6, 33, 800, 'Standard terms'),
+    (1121111233, GETDATE(), 6, 33, 800, 'Standard terms'),
+    (0011445566, '2023-04-10', 6, 13, 20, 'Standard terms'),
+    (0011445566, '2023-05-12', 6, 13, 20, 'Standard terms'),
+    (0011445566, GETDATE(), 7, 13, 20, 'Standard terms'),
+    (0012556677, GETDATE(), 7, 13, 20, 'Standard terms'),
+    (0012667788, GETDATE(), 7, 33, 300, 'Standard terms');
+
+
+select * from Voucher;
+
+DECLARE @latestDatetimeOfReciving DATETIME;
+SELECT @latestDatetimeOfReciving = MAX(datetimeOfReciving) FROM Voucher;
+
+INSERT INTO Exam (datetimeOfExam, result, examinerID, voucherID)
+VALUES 
+    (DATEADD(DAY, 1, @latestDatetimeOfReciving), 'positive', 1, 1),
+    (DATEADD(DAY, 2, @latestDatetimeOfReciving), 'negative', 1, 2),
+    (DATEADD(DAY, 3, @latestDatetimeOfReciving), 'positive', 1, 3),
+    (DATEADD(DAY, 4, @latestDatetimeOfReciving), 'negative', 1, 4),
+    (DATEADD(DAY, 5, @latestDatetimeOfReciving), 'positive', 1, 5),
+    (DATEADD(DAY, 6, @latestDatetimeOfReciving), 'negative', 1, 6),
+    (DATEADD(DAY, 7, @latestDatetimeOfReciving), 'positive', 9, 7),
+    (DATEADD(DAY, 8, @latestDatetimeOfReciving), 'negative', 9, 8),
+    (DATEADD(DAY, 9, @latestDatetimeOfReciving), 'positive', 9, 9),
+    (DATEADD(DAY, 10, @latestDatetimeOfReciving), 'negative', 9, 10),
+    (DATEADD(DAY, 11, @latestDatetimeOfReciving), 'positive', 9, 11),
+    (DATEADD(DAY, 12, @latestDatetimeOfReciving), 'negative', 9, 12),
+    (DATEADD(DAY, 13, @latestDatetimeOfReciving), 'positive', 9, 13),
+    (DATEADD(DAY, 14, @latestDatetimeOfReciving), 'negative', 1, 14),
+    (DATEADD(DAY, 15, @latestDatetimeOfReciving), 'positive', 1, 15);
+
+select * from Exam;
+
+INSERT INTO PracticalExam (examRoute, examID)
+VALUES 
+    ('Route 3', 17),
+    ('Route 3', 18),
+    ('Route 3', 19),
+    ('Route 5', 20),
+    ('Route 5', 21),
+    ('Route 1', 22),
+    ('Route 2', 27);
+
+select * from PracticalExam;
+
+INSERT INTO TransportVehicle (registrationPlate, technicalCondition, model, brand, 
+transmission, instructorID)
+VALUES 
+    ('ABC123', 'Good', 'Sedan', 'Toyota', 'Automatic', 4),
+    ('XYZ456', 'Excellent', 'SUV', 'Ford', 'Manual', 7),
+    ('LMN789', 'Fair', 'Hatchback', 'Honda', 'Automatic', 8),
+    ('PQR012', 'Good', 'Truck', 'Chevrolet', 'Manual', 9);
+
+select * from TransportVehicle;
+
+-- Insert data into Question table
+INSERT INTO Question (text)
+VALUES 
+    ('What is the speed limit on highways?'),
+    ('What does a yellow traffic light indicate?'),
+    ('What is the meaning of a stop sign?'),
+    ('When should you use your headlights?'),
+    ('What is the legal blood alcohol concentration limit?');
+
+
+select * from Question;
+
+INSERT INTO Answer (questionID, [text], isCorrect)
+VALUES 
+    (1, '60 mph', 0),
+    (1, '70 mph', 0),
+    (1, '55 mph', 1),
+    (2, 'Slow down', 1),
+    (2, 'Speed up', 0),
+    (2, 'Stop', 0),
+    (3, 'Proceed with caution', 0),
+    (3, 'Stop completely', 1),
+    (3, 'Prepare to turn', 0),
+    (4, 'Only at night', 0),
+    (4, 'In fog or rain', 1),
+    (4, 'On private property', 0),
+    (5, '0.05%', 0),
+    (5, '0.08%', 1),
+    (5, '0.10%', 0);
+
+select * from Answer;
+
+INSERT INTO TheoreticalExam (examID, duration, score)
+VALUES 
+    (13, 15, 18),
+    (14, 20, 16),
+    (15, 18, 20);
+
+select * from TheoreticalExam;
+
+INSERT INTO TheoreticalExam_Question (theoreticalExamID, questionID)
+VALUES 
+    (1, 1),
+    (1, 2),
+    (1, 3),
+    (2, 4),
+    (2, 5),
+    (3, 1),
+    (3, 3),
+    (3, 5);
+
+select * from TheoreticalExam_Question;
+
+INSERT INTO PracticalExam_TransportVehicle (practicalExamID, registrationPlate)
+VALUES 
+    (6, 'XYZ456'),
+    (2, 'LMN789'),
+    (3, 'PQR012');
+
+select * from PracticalExam_TransportVehicle ;
+
+
+INSERT INTO ClientAnswer (theoreticalExamID, answerID)
+VALUES 
+    (1, 3),
+    (1, 2),
+    (2, 4),
+    (2, 5),
+    (3, 1),
+    (3, 3);
+
+select * from ClientAnswer;
+
+-- positively completed 
+SELECT DISTINCT C.TIN, C.surname, C.firstname
+FROM Candidate C
+JOIN Voucher V ON C.TIN = V.TIN
+JOIN Exam E ON V.voucherID = E.voucherID
+JOIN PracticalExam P ON E.examID = P.examID
+WHERE E.result = 'positive';
+
+INSERT INTO DriversLicense (seriesAndNumber, validityPeriod, issueDate, ownerID, category)
+SELECT 
+    CONCAT('DL', ROW_NUMBER() OVER (ORDER BY C.TIN)) AS seriesAndNumber,
+    CASE WHEN E.result = 'positive' THEN 2 ELSE 10 END AS validityPeriod,
+    GETDATE() AS issueDate,
+    C.TIN AS ownerID,
+    'B' AS category
+FROM Candidate C
+JOIN Voucher V ON C.TIN = V.TIN
+JOIN Exam E ON V.voucherID = E.voucherID
+JOIN PracticalExam P ON E.examID = P.examID
+WHERE E.result = 'positive';
+
+select * from DriversLicense;
 

@@ -57,26 +57,25 @@ CREATE TABLE MedCard (
     bloodType VARCHAR(2) NOT NULL,
     Rh CHAR(1) NOT NULL,
     issueDate DATE NOT NULL, 
-    validUntil AS DATEADD(YEAR, 8, issueDate) PERSISTED NOT NULL
+    validUntil AS DATEADD(YEAR, 8, issueDate) PERSISTED NOT NULL,
+	UNIQUE (medCardID)
 );
 
 -- Candidate table with FOREIGN KEY constraint
 CREATE TABLE Candidate (
-    TIN INT PRIMARY KEY,
+    TIN BIGINT PRIMARY KEY,
     surname VARCHAR(100) NOT NULL,
     firstname VARCHAR(100) NOT NULL,
     dateOfBirth DATE NOT NULL,
     phoneNumber VARCHAR(15) NOT NULL,
-    ownerID INT FOREIGN KEY REFERENCES MedCard(medCardID)
+    ownerID INT FOREIGN KEY REFERENCES MedCard(medCardID),
+	UNIQUE (TIN)
 );
-
-ALTER TABLE Candidate
-ALTER COLUMN TIN BIGINT;
 
 
 CREATE TABLE Voucher (
     voucherID INT IDENTITY(1,1) PRIMARY KEY,
-    TIN INT NOT NULL, 
+    TIN BIGINT NOT NULL, 
     datetimeOfReciving DATETIME NOT NULL,
     centerID INT NOT NULL, 
     payment DECIMAL(10, 2),
@@ -113,7 +112,8 @@ CREATE TABLE TransportVehicle (
     brand VARCHAR(50) NOT NULL,
     transmission VARCHAR(20) NOT NULL,
     instructorID INT NOT NULL, 
-    FOREIGN KEY (instructorID) REFERENCES Worker(workerID)
+    FOREIGN KEY (instructorID) REFERENCES Worker(workerID),
+	UNIQUE (registrationPlate)
 );
 
 
@@ -121,7 +121,7 @@ CREATE TABLE DriversLicense (
     seriesAndNumber VARCHAR(20) PRIMARY KEY,
     validityPeriod INT NOT NULL, 
     issueDate DATE NOT NULL,
-    ownerID INT NOT NULL,
+    ownerID BIGINT NOT NULL,
     category VARCHAR(10) NOT NULL,
     validUntil AS 
         CASE 
@@ -169,10 +169,8 @@ CREATE TABLE TheoreticalExam_Question (
 CREATE TABLE ClientAnswer (
     clientAnswerID INT IDENTITY(1,1) PRIMARY KEY,
     theoreticalExamID INT,
-    questionID INT,
     answerID INT,
     FOREIGN KEY (theoreticalExamID) REFERENCES TheoreticalExam(theoreticalExamID),
-    FOREIGN KEY (questionID) REFERENCES Question(questionID),
     FOREIGN KEY (answerID) REFERENCES Answer(answerID)
 );
 
@@ -184,3 +182,4 @@ CREATE TABLE PracticalExam_TransportVehicle (
     FOREIGN KEY (practicalExamID) REFERENCES PracticalExam(practicalExamID),
     FOREIGN KEY (registrationPlate) REFERENCES TransportVehicle(registrationPlate)
 );
+
