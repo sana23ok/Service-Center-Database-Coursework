@@ -168,6 +168,60 @@ END;
 -- Execute the stored procedure
 EXEC FillExamResults;
 
+
+-- 9) знайти список питань, що були задані конкретному кандидату на теоретичному екзамені 
+
+CREATE OR ALTER PROCEDURE GetTheoreticalExamDetails
+    @TargetTIN BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the theoretical exam ID for the given person
+    DECLARE @TheoreticalExamID INT;
+
+    SELECT @TheoreticalExamID = te.theoreticalExamID
+    FROM TheoreticalExam te
+    JOIN Exam e ON te.examID = e.examID
+    JOIN Voucher v ON e.voucherID = v.voucherID
+    JOIN Candidate c ON v.TIN = c.TIN
+    WHERE c.TIN = @TargetTIN;
+
+    IF @TheoreticalExamID IS NOT NULL
+    BEGIN
+        -- Get the list of questions, client answers, and correct answers for the theoretical exam
+        SELECT
+            q.text AS Question,
+            ISNULL(a.text, 'Not Answered') AS ClientAnswer,
+            a.isCorrect AS IsCorrectAnswer
+        FROM
+            TheoreticalExam_Question tq
+        JOIN Question q ON tq.questionID = q.questionID
+        LEFT JOIN ClientAnswer ca ON tq.theoreticalExamID = ca.theoreticalExamID
+        LEFT JOIN Answer a ON ca.answerID = a.answerID
+        WHERE
+            tq.theoreticalExamID = @TheoreticalExamID;
+    END
+    ELSE
+    BEGIN
+        PRINT 'Theoretical exam not found for the specified TIN.';
+    END
+END;
+
+
+EXEC GetTheoreticalExamDetails @TargetTIN = 1234563456;
+
+select * from TheoreticalExam;
+
+
+select t.*, c.surname, c.TIN
+from TheoreticalExam t
+join Exam e ON e.examID = t.examID
+join Voucher v on v.voucherID = e.voucherID
+join Candidate c on c.TIN = v.TIN;
+
+
+
 -- FUNCTIONS 
 
 -- 1)Отримати кількість працівників у конкретному центрі:
