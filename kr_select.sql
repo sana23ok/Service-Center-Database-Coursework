@@ -1,10 +1,10 @@
 use MSVServiceCenter;
 
---* створення не менше 20 DML-запитів типу SELECT (не включаючи insert, delete, update) різних за суттю;
+-- * створення не менше 20 DML-запитів типу SELECT (не включаючи insert, delete, update) різних за суттю;
 
--- *кількість таблиць, атрибути яких використовуються у запиті не менше двох;
+-- * кількість таблиць, атрибути яких використовуються у запиті не менше двох;
 
--- *щонайменше 4 запити повинні використовувати підзапити.
+-- * щонайменше 4 запити повинні використовувати підзапити.
 
 -- 1) Вивести всі дані про кандидатів, які мають дійсні медичні картки з заданою групою крові та резусом.
 
@@ -164,9 +164,49 @@ SELECT * FROM TheoreticalExam WHERE duration <= 15
 INTERSECT
 SELECT * FROM TheoreticalExam WHERE score >= 18;
 
--- 17)
+-- 17) визначити іспити, за які було отримано оцінку за теоретичний екзамен,
+-- а за які не було, тобто екзамен не був практичним 
 
+SELECT E.examID, E.voucherID, E.datetimeOfExam, E.result, Th.score
+FROM Exam E
+LEFT JOIN TheoreticalExam Th ON  Th.examID = E.examID;
 
+-- 18) порівняти відповіді вказаного коритувача з правильними на теоретичному іспиті
+
+SELECT A.answerID, A.candidateAnswer, Q.correctAnswer FROM Answer A
+JOIN Question Q ON Q.questionID = A.questionID
+JOIN TheoreticalExam ThE ON ThE.theoreticalExamID = A.theoreticalExamID
+JOIN Exam E ON E.examID = ThE.examID
+JOIN Voucher V ON V.voucherID = E.voucherID
+JOIN Candidate C ON C.TIN = V.TIN
+WHERE C.TIN = 1234563456;
+
+-- 19) порахувати суму оплат, зроблених у вказаному сервісному центрі у вказаний день
+
+SELECT SUM(payment + fee) AS TotalPayments, C.centerID, A.city
+FROM Voucher V
+JOIN ServiceCenter C ON C.centerID = V.centerID 
+JOIN Address A ON A.addressID = C.addressID
+WHERE CAST(datetimeOfReciving AS DATE) = '2023-12-24' AND V.centerID = 4
+GROUP BY C.centerID, A.city;
+
+-- 20) Підрахувати працівників, що займають посади 'Instructor' та 'Examiner'
+
+SELECT
+    'Instructor' AS positionType,
+    COUNT(*) AS workerCount
+FROM
+    Worker
+WHERE
+    positionID IN (SELECT positionID FROM Position WHERE positionName = 'Instructor')
+UNION
+SELECT
+    'Examiner' AS positionType,
+    COUNT(*) AS workerCount
+FROM
+    Worker
+WHERE
+    positionID IN (SELECT positionID FROM Position WHERE positionName = 'Examiner');
 
 
 -- 21) вибрати позицію з більшою середньою заробітною платою з позицій 'Instructor' та 'Examiner'
@@ -197,24 +237,3 @@ SELECT
 FROM InstructorAvg, ExaminerAvg; 
 
 
-
-
-
-
--- Select all theoretical exams and their associated questions 
---(including those without questions)
-SELECT TE.*, Q.*
-FROM TheoreticalExam TE
-LEFT JOIN TheoreticalExam_Question TEQ ON TE.theoreticalExamID = TEQ.theoreticalExamID
-LEFT JOIN Question Q ON TEQ.questionID = Q.questionID;
-
-
--- Select all questions and their associated theoretical exams (including those without exams) using right outer join
-SELECT Q.*, TE.*
-FROM Question Q
-RIGHT JOIN TheoreticalExam_Question TEQ ON Q.questionID = TEQ.questionID
-RIGHT JOIN TheoreticalExam TE ON TEQ.theoreticalExamID = TE.theoreticalExamID;
-
-SELECT SUM(payment+fee) AS TotalPayments
-FROM Voucher
-WHERE CAST(datetimeOfReciving AS DATE) = '2023-12-24' AND centerID = 4;

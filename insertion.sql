@@ -381,6 +381,30 @@ VALUES
 ('How often should you check your vehicles tire pressure?', 'C');
 
 
+INSERT INTO Question (text, correctAnswer)
+VALUES 
+('What is the meaning of a flashing yellow traffic light?', 'B'),
+('What should you do when you see a pedestrian crossing?', 'A'),
+('What does a solid white line on the road mean?', 'C'),
+('What is the minimum safe following distance in normal weather conditions?', 'D'),
+('What does a rectangular-shaped sign with a white background indicate?', 'A'),
+('When should you use your high beam headlights?', 'B'),
+('What does a circular sign with a red border indicate?', 'C'),
+('What should you do if you encounter an emergency vehicle with flashing lights?', 'D'),
+('What is the legal age to obtain a driver’s license?', 'A'),
+('What does a yellow diamond-shaped sign indicate?', 'B'),
+('When can you make a U-turn?', 'C'),
+('What does a red and white sign with an arrow pointing downward indicate?', 'D'),
+('How often should you have your vehicle inspected?', 'A'),
+('What does a flashing red traffic light indicate?', 'B'),
+('When should you use your parking brake?', 'C'),
+('What does a sign with a yellow background and black symbol indicate?', 'D'),
+('What should you do if your vehicle starts to skid?', 'A'),
+('What does a green arrow traffic light indicate?', 'B'),
+('When should you use your turn signals?', 'C'),
+('What does a sign with a blue circle and white symbol indicate?', 'D');
+
+
 -- Insert data into TheoreticalExam_Question table for the new questions
 INSERT INTO TheoreticalExam_Question (theoreticalExamID, questionID)
 VALUES 
