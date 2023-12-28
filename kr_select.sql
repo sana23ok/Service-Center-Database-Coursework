@@ -13,7 +13,6 @@ FROM Candidate c
 JOIN MedCard m ON c.ownerID = m.medCardID
 WHERE m.bloodType = 'A' AND m.Rh = '+';
 
-
 -- 2) Пронумерувати працівників за досвідом у зворотньому порядку
 
 SELECT ROW_NUMBER() OVER (ORDER BY p.experience DESC) AS RowNum,
@@ -69,6 +68,7 @@ JOIN Exam e ON pe.examID = e.examID;
 SELECT
     w.firstname,
     w.surname,
+	w.drivingSchool,
     sc.centerID
 FROM
     Worker w
@@ -93,6 +93,7 @@ ORDER BY TotalPayments DESC;
 -- 10) Вибрати кандидатів, зо зареєстровані в системі, але не мають жодного талона
 
 -- /ПІДЗАПИТ 3/
+
 SELECT TIN, firstname, surname
 FROM Candidate c
 WHERE NOT EXISTS (
@@ -145,25 +146,74 @@ JOIN Candidate c ON v.TIN = c.TIN
 JOIN PracticalExam_TransportVehicle petv ON p.practicalExamID = petv.practicalExamID
 JOIN TransportVehicle tv ON petv.registrationPlate = tv.registrationPlate;
 
--- 15) Список питань і правильних відповідей
-SELECT q.questionID, q.text as questionText, a.answerID, a.text as answerText
-FROM Question q
-LEFT JOIN Answer a ON q.questionID = a.questionID
-WHERE a.isCorrect = 1;
+
+--15) обрати питання, що були використані на певному теоретичному екзамені
+
+SELECT Q.*
+FROM Question Q
+JOIN TheoreticalExam_Question TEQ ON Q.questionID = TEQ.questionID
+JOIN TheoreticalExam TE ON TEQ.theoreticalExamID = TE.theoreticalExamID
+WHERE TE.theoreticalExamID = 1;
+
+
+-- 16) запит вибирає всі теоретичні екзамени, тривалість яких не перевищує 15 хвилин, 
+-- і які мають оцінку 18 або вище. Він використовує оператор INTERSECT для вибору спільних
+-- записів з обох умов.
+
+SELECT * FROM TheoreticalExam WHERE duration <= 15
+INTERSECT
+SELECT * FROM TheoreticalExam WHERE score >= 18;
+
+-- 17)
+
+
+
+
+-- 21) вибрати позицію з більшою середньою заробітною платою з позицій 'Instructor' та 'Examiner'
+WITH InstructorAvg AS (
+    SELECT AVG(salary) AS avgSalary
+    FROM Position p
+    JOIN Worker w ON w.positionID = p.positionID
+    WHERE positionName = 'Instructor'
+),
+
+ExaminerAvg AS (
+    SELECT AVG(salary) AS avgSalary
+    FROM Position p
+    JOIN Worker w ON w.positionID = p.positionID
+    WHERE positionName = 'Examiner'
+)
+SELECT 
+    CASE 
+        WHEN InstructorAvg.avgSalary > ExaminerAvg.avgSalary THEN 'Instructor'
+        WHEN InstructorAvg.avgSalary < ExaminerAvg.avgSalary THEN 'Examiner'
+        ELSE 'Equal' 
+    END AS HigherPosition,
+    CASE 
+        WHEN InstructorAvg.avgSalary > ExaminerAvg.avgSalary THEN InstructorAvg.avgSalary
+        WHEN InstructorAvg.avgSalary < ExaminerAvg.avgSalary THEN ExaminerAvg.avgSalary
+        ELSE InstructorAvg.avgSalary 
+    END AS HigherAvgSalary
+FROM InstructorAvg, ExaminerAvg; 
 
 
 
 
 
 
+-- Select all theoretical exams and their associated questions 
+--(including those without questions)
+SELECT TE.*, Q.*
+FROM TheoreticalExam TE
+LEFT JOIN TheoreticalExam_Question TEQ ON TE.theoreticalExamID = TEQ.theoreticalExamID
+LEFT JOIN Question Q ON TEQ.questionID = Q.questionID;
 
 
-
-
-
-
-
---4) Підрахувати загальну суму оплат усіх талонів у таблиці "Voucher"
+-- Select all questions and their associated theoretical exams (including those without exams) using right outer join
+SELECT Q.*, TE.*
+FROM Question Q
+RIGHT JOIN TheoreticalExam_Question TEQ ON Q.questionID = TEQ.questionID
+RIGHT JOIN TheoreticalExam TE ON TEQ.theoreticalExamID = TE.theoreticalExamID;
 
 SELECT SUM(payment+fee) AS TotalPayments
 FROM Voucher

@@ -50,7 +50,6 @@ CREATE TABLE Worker(
     FOREIGN KEY (positionID) REFERENCES Position(positionID)
 );
 
-
 -- MedCard table
 CREATE TABLE MedCard (
     medCardID INT IDENTITY(1,1) PRIMARY KEY,
@@ -71,7 +70,6 @@ CREATE TABLE Candidate (
     ownerID INT FOREIGN KEY REFERENCES MedCard(medCardID),
 	UNIQUE (TIN)
 );
-
 
 CREATE TABLE Voucher (
     voucherID INT IDENTITY(1,1) PRIMARY KEY,
@@ -130,7 +128,6 @@ CREATE TABLE TransportVehicle (
 	UNIQUE (registrationPlate)
 );
 
-
 CREATE TABLE DriversLicense (
     seriesAndNumber VARCHAR(20) PRIMARY KEY,
     validityPeriod INT NOT NULL, 
@@ -146,48 +143,6 @@ CREATE TABLE DriversLicense (
         FOREIGN KEY (ownerID) REFERENCES Candidate(TIN)
 );
 
--- Таблиця з теоретичними екзаменами
-CREATE TABLE TheoreticalExam (
-    theoreticalExamID INT IDENTITY(1,1) PRIMARY KEY,
-    examID INT,
-	duration INT CHECK (duration >= 0 and duration <= 20),
-	score INT CHECK (score >= 0 and score <= 20)
-    FOREIGN KEY (examID) REFERENCES Exam(examID)
-);
-
--- Таблиця з запитаннями
-CREATE TABLE Question (
-    questionID INT IDENTITY(1,1) PRIMARY KEY,
-    text VARCHAR(500) NOT NULL
-);
-
--- Таблиця з відповідями
-CREATE TABLE Answer (
-    answerID INT IDENTITY(1,1) PRIMARY KEY,
-    questionID INT,
-    text NVARCHAR(MAX) NOT NULL,
-    isCorrect BIT, -- Флаг для визначення правильної відповіді
-    FOREIGN KEY (questionID) REFERENCES Question(questionID)
-);
-
--- Таблиця для зв'язку теоретичного екзамену із запитаннями
-CREATE TABLE TheoreticalExam_Question (
-    theoreticalExamID INT,
-    questionID INT,
-    PRIMARY KEY (theoreticalExamID, questionID),
-    FOREIGN KEY (theoreticalExamID) REFERENCES TheoreticalExam(theoreticalExamID),
-	FOREIGN KEY (questionID) REFERENCES Question(questionID)
-);
-
--- Таблиця для зберігання відповідей клієнта на теоретичний екзамен
-CREATE TABLE ClientAnswer (
-    clientAnswerID INT IDENTITY(1,1) PRIMARY KEY,
-    theoreticalExamID INT,
-    answerID INT,
-    FOREIGN KEY (theoreticalExamID) REFERENCES TheoreticalExam(theoreticalExamID),
-    FOREIGN KEY (answerID) REFERENCES Answer(answerID)
-);
-
 -- Linking table for the many-to-many relationship
 CREATE TABLE PracticalExam_TransportVehicle (
     practicalExamID INT NOT NULL,
@@ -197,3 +152,35 @@ CREATE TABLE PracticalExam_TransportVehicle (
     FOREIGN KEY (registrationPlate) REFERENCES TransportVehicle(registrationPlate)
 );
 
+-- Таблиця з теоретичними екзаменами
+CREATE TABLE TheoreticalExam (
+    theoreticalExamID INT IDENTITY(1,1) PRIMARY KEY,
+    examID INT,
+	duration INT CHECK (duration >= 0 and duration <= 20),
+	score INT CHECK (score >= 0 and score <= 20)
+    FOREIGN KEY (examID) REFERENCES Exam(examID)
+);
+
+CREATE TABLE Question(
+    questionID INT IDENTITY(1,1) PRIMARY KEY,
+    text VARCHAR(500) NOT NULL, 
+	correctAnswer VARCHAR(20) NOT NULL
+)
+
+CREATE TABLE Answer(
+	answerID INT IDENTITY(1,1) PRIMARY KEY,
+	candidateAnswer VARCHAR(20),
+	questionID INT NOT NULL, 
+	theoreticalExamID INT NOT NULL
+	FOREIGN KEY (questionID) REFERENCES Question(questionID), 
+	FOREIGN KEY (theoreticalExamID) REFERENCES TheoreticalExam(theoreticalExamID)
+)
+
+-- Таблиця для зв'язку теоретичного екзамену із запитаннями
+CREATE TABLE TheoreticalExam_Question (
+    theoreticalExamID INT,
+    questionID INT,
+    PRIMARY KEY (theoreticalExamID, questionID),
+    FOREIGN KEY (theoreticalExamID) REFERENCES TheoreticalExam(theoreticalExamID),
+	FOREIGN KEY (questionID) REFERENCES Question(questionID)
+);

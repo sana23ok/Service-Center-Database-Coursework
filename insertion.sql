@@ -353,9 +353,85 @@ EXEC FillExamsFromVoucher;
 
 select * from PracticalExam;
 select * from TheoreticalExam;
-
-
-
 select * from Exam;
+select * from Question;
 
 
+select * from Question;
+INSERT INTO Question (text, correctAnswer)
+VALUES 
+('What is the speed limit on highways?', 'C'),
+('When must you use your headlights?', 'A'),
+('What does a blue traffic sign indicate?', 'B'),
+('What should you do if you encounter a school bus with flashing red lights?', 'D'),
+('What is the purpose of a yield sign?', 'C'),
+('When is it legal to pass another vehicle?', 'B'),
+('What does a white painted curb indicate?', 'A'),
+('When approaching a railroad crossing, what should you do?', 'C'),
+('What is the legal blood alcohol concentration (BAC) limit for drivers?', 'D'),
+('What does a green traffic light indicate?', 'A'),
+('When can you use your horn while driving?', 'C'),
+('What does a diamond-shaped sign with an orange center indicate?', 'B'),
+('How far ahead should you signal before making a turn?', 'A'),
+('What does a double solid yellow line on the road mean?', 'D'),
+('In adverse weather conditions, what should you do to maintain a safe following distance?', 'C'),
+('What does a red octagonal sign indicate?', 'A'),
+('When should you use your hazard lights?', 'D'),
+('What does a black and white sign with an arrow pointing upward indicate?', 'B'),
+('How often should you check your vehicles tire pressure?', 'C');
+
+
+-- Insert data into TheoreticalExam_Question table for the new questions
+INSERT INTO TheoreticalExam_Question (theoreticalExamID, questionID)
+VALUES 
+(1, 7),
+(1, 8),
+(1, 9),
+(1, 10),
+(1, 11),
+(1, 12),
+(1, 13),
+(1, 14),
+(1, 15),
+(1, 16),
+(1, 17),
+(1, 18),
+(1, 19),
+(1, 20);
+
+
+INSERT INTO Answer (candidateAnswer, questionID, theoreticalExamID)
+VALUES 
+('C', 1, 1),
+('A', 2, 1),
+('B', 3, 1),
+('D', 4, 1),
+('C', 5, 1),
+('B', 6, 1),
+('A', 7, 1),
+('C', 8, 1),
+('D', 9, 1),
+('A', 10, 1),
+('C', 11, 1),
+('B', 12, 1),
+('A', 13, 1),
+('D', 14, 1),
+('C', 15, 1),
+('A', 16, 1),
+('D', 17, 1),
+('B', 18, 1),
+('C', 19, 1),
+('D', 20, 1); -- This is the incorrect answer
+
+select * from Answer;
+select * from Question;
+select * from TheoreticalExam;
+select * from TheoreticalExam_Question;
+
+
+UPDATE TheoreticalExam
+SET score = 14
+where examID = 13;
+
+select * from TheoreticalExam;
+select * from Exam;

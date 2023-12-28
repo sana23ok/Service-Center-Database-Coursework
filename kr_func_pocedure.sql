@@ -67,7 +67,7 @@ EXEC GetExamCountsByDate  @specificDate = '2023-12-25';
 
 select * from Exam;
 
--- 5) вибрати кандидатів, що допущені до практичного екзамену
+-- 4) вибрати кандидатів, що допущені до практичного екзамену
 
 CREATE PROCEDURE GetCandidatesForPracticalExam
 AS
@@ -85,7 +85,7 @@ END;
 EXEC GetCandidatesForPracticalExam;
 
 
--- 6) вибрати кандитатів, що успішно склали екзамени і вже мать посвідчення 
+-- 5) вибрати кандитатів, що успішно склали екзамени і вже мать посвідчення 
 
 CREATE OR ALTER PROCEDURE GetSuccessfulCandidatesWithLicense
 AS
@@ -115,7 +115,7 @@ END;
 EXEC GetSuccessfulCandidatesWithLicense;
 
 
--- 7) процедура для автоматичного заповнення даних на основі даних про талон 
+-- 6) процедура для автоматичного заповнення даних на основі даних про талон 
 CREATE PROCEDURE FillExamsFromVoucher
 AS
 BEGIN
@@ -153,7 +153,7 @@ END;
 
 EXEC FillExamsFromVoucher;
 
--- 8) автоматичне заповнення результаів на основі балу на теооретичному екзамені
+-- 7) автоматичне заповнення результаів на основі балу на теооретичному екзамені
 CREATE OR ALTER PROCEDURE FillExamResults
 AS
 BEGIN
@@ -161,15 +161,14 @@ BEGIN
     UPDATE Exam
     SET result = CASE WHEN TheoreticalExam.score >= 18 THEN 'positive' ELSE 'negative' END
     FROM Exam
-    INNER JOIN TheoreticalExam ON Exam.examID = TheoreticalExam.examID
-    WHERE result IS NULL; -- Update only if result is NULL or adjust the condition accordingly
+    INNER JOIN TheoreticalExam ON Exam.examID = TheoreticalExam.examID;
 END;
 
 -- Execute the stored procedure
 EXEC FillExamResults;
 
 
--- 9) знайти список питань, що були задані конкретному кандидату на теоретичному екзамені 
+-- 8) знайти список питань, що були задані конкретному кандидату на теоретичному екзамені 
 
 CREATE OR ALTER PROCEDURE GetTheoreticalExamDetails
     @TargetTIN BIGINT
@@ -219,6 +218,36 @@ from TheoreticalExam t
 join Exam e ON e.examID = t.examID
 join Voucher v on v.voucherID = e.voucherID
 join Candidate c on c.TIN = v.TIN;
+
+
+-- 9) Обрахувати результат теоретичного екзамену
+-- Create a function to calculate the score for a theoretical exam
+CREATE OR ALTER FUNCTION dbo.CalculateScore(@theoreticalExamID INT)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @score INT = 0;
+
+    SELECT @score = @score + CASE
+                                WHEN A.candidateAnswer = Q.correctAnswer THEN 1
+                                ELSE 0
+                             END
+    FROM Answer A
+    INNER JOIN Question Q ON A.questionID = Q.questionID
+    WHERE A.theoreticalExamID = @theoreticalExamID;
+
+    RETURN @score;
+END;
+
+-- Update the score column in the TheoreticalExam table using the function
+declare @thExID INT = 1;
+
+UPDATE TheoreticalExam
+SET score = dbo.CalculateScore(@thExID)
+WHERE theoreticalExamID = @thExID;
+
+-- View the updated TheoreticalExam table
+SELECT * FROM TheoreticalExam;
 
 
 
