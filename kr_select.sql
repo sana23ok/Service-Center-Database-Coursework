@@ -237,3 +237,8 @@ SELECT
 FROM InstructorAvg, ExaminerAvg; 
 
 
+-- 22) 
+
+select * from PossibleAnswers;
+
+select * from Question;

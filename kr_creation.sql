@@ -87,9 +87,12 @@ ALTER TABLE Voucher
 ADD examDateTime DATETIME;
 
 ALTER TABLE Voucher
-ADD ServiceType VARCHAR(20) CHECK (ServiceType IN ('theoretical exam', 
-													'practical exam', 
-													'licence reciving'));
+ADD ServiceType VARCHAR(20) CHECK (ServiceType IN 
+('theoretical exam', 'practical exam', 'licence reciving'));
+
+ALTER TABLE Voucher
+ADD CONSTRAINT CHK_ExamDateTime
+CHECK (datetimeOfReciving < examDateTime);
 
 -- Exam table
 CREATE TABLE Exam (
@@ -101,6 +104,10 @@ CREATE TABLE Exam (
     FOREIGN KEY (examinerID) REFERENCES Worker(workerID),
 	FOREIGN KEY (voucherID) REFERENCES Voucher(voucherID)
 );
+
+
+ALTER TABLE Exam
+ALTER COLUMN datetimeOfExam DATETIME NULL;
 
 ALTER TABLE Exam
 ALTER COLUMN examinerID int NULL;
@@ -176,6 +183,15 @@ CREATE TABLE Answer(
 	FOREIGN KEY (theoreticalExamID) REFERENCES TheoreticalExam(theoreticalExamID)
 )
 
+CREATE TABLE PossibleAnswers (
+    possibleAnswerID INT IDENTITY(1,1) PRIMARY KEY,
+    letter CHAR,
+    text VARCHAR(500),
+    questionID INT,
+    FOREIGN KEY (questionID) REFERENCES Question(questionID) ON DELETE CASCADE
+);
+
+
 -- Таблиця для зв'язку теоретичного екзамену із запитаннями
 CREATE TABLE TheoreticalExam_Question (
     theoreticalExamID INT,
@@ -184,3 +200,4 @@ CREATE TABLE TheoreticalExam_Question (
     FOREIGN KEY (theoreticalExamID) REFERENCES TheoreticalExam(theoreticalExamID),
 	FOREIGN KEY (questionID) REFERENCES Question(questionID)
 );
+

@@ -1,5 +1,166 @@
 use MSVServiceCenter;
 
+-- Question 16
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Stop and wait for the green light', 16),
+('B', 'Proceed with caution without stopping', 16),
+('C', 'Slow down and prepare to yield', 16),
+('D', 'Honk the horn and proceed', 16);
+
+-- Question 17
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Only in heavy rain', 17),
+('B', 'Only in foggy conditions', 17),
+('C', 'Only when there is a hazard on the road', 17),
+('D', 'Never use hazard lights while driving', 17);
+
+-- Question 18
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Indicates a detour ahead', 18),
+('B', 'Indicates a one-way street', 18),
+('C', 'Indicates a parking area', 18),
+('D', 'Indicates an upcoming hill', 18);
+
+-- Question 19
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Every 500 miles', 19),
+('B', 'Every month', 19),
+('C', 'Every time you fill up with gas', 19),
+('D', 'Every six months', 19);
+
+-- Question 20
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Indicates a U-turn is allowed', 20),
+('B', 'Indicates a sharp turn to the right', 20),
+('C', 'Indicates a sharp turn to the left', 20),
+('D', 'Indicates a road branching off to the right', 20);
+
+
+-- Generate 4 possible answers with realistic data for each question (10-15)
+-- Question 10
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Drive cautiously and be prepared to stop', 10),
+('B', 'Continue at the same speed and pass quickly', 10),
+('C', 'Slow down and prepare to yield to the right', 10),
+('D', 'Stop and yield the right-of-way to other drivers', 10);
+
+-- Question 11
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Turn on your high beams', 11),
+('B', 'Turn on your headlights 30 minutes before sunset', 11),
+('C', 'Turn on your headlights 30 minutes after sunrise', 11),
+('D', 'Turn on your headlights in low visibility conditions', 11);
+
+-- Question 12
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Indicates a school zone', 12),
+('B', 'Indicates a construction zone', 12),
+('C', 'Indicates a recreational area', 12),
+('D', 'Indicates a hospital zone', 12);
+
+-- Question 13
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Honk and proceed with caution', 13),
+('B', 'Stop until the lights stop flashing', 13),
+('C', 'Pass quickly without stopping', 13),
+('D', 'Proceed with caution if no children are visible', 13);
+
+-- Question 14
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Indicates you must come to a complete stop', 14),
+('B', 'Indicates you should yield to oncoming traffic', 14),
+('C', 'Indicates you may pass if it is safe to do so', 14),
+('D', 'Indicates a warning about a curve ahead', 14);
+
+-- Question 15
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Increase your following distance', 15),
+('B', 'Tailgate to keep a safe distance', 15),
+('C', 'Maintain the same following distance', 15),
+('D', 'Drive faster to avoid other vehicles', 15);
+
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', '120 km/h', 1),
+('B', '100 km/h', 1),
+('C', '110 km/h', 1),
+('D', '90 km/h', 1),
+
+('A', 'From sunset to sunrise', 2),
+('B', 'When it is raining', 2),
+('C', 'When visibility is less than 500 feet', 2),
+('D', 'All of the above', 2),
+
+('A', 'Parking regulations', 3),
+('B', 'Motorist services', 3),
+('C', 'Road user services', 3),
+('D', 'Physical obstructions', 3);
+
+
+-- Question 6
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'When you are on a one-way street', 6),
+('B', 'When the vehicle ahead of you is turning left', 6),
+('C', 'When you are in a school zone', 6),
+('D', 'When the vehicle ahead of you is turning right', 6);
+
+-- Question 7
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Passenger loading and unloading only', 7),
+('B', 'No parking', 7),
+('C', 'Parking for a limited time', 7),
+('D', 'Parking for disabled persons', 7);
+
+-- Question 8
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Stop completely and wait for the train to pass', 8),
+('B', 'Proceed with caution', 8),
+('C', 'Look both ways, listen for a train, and proceed if it is safe to do so', 8),
+('D', 'Increase your speed to cross the tracks quickly', 8);
+
+-- Question 9
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', '0.08%', 9),
+('B', '0.10%', 9),
+('C', '0.05%', 9),
+('D', '0.02%', 9);
+
+-- Question 10
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Go if the way is clear', 10),
+('B', 'Stop and wait for the light to turn red', 10),
+('C', 'Prepare to stop', 10),
+('D', 'Turn right', 10);
+
+
+INSERT INTO PossibleAnswers (letter, text, questionID)
+VALUES 
+('A', 'Continue driving', 4),
+('B', 'Honk your horn', 4),
+('C', 'Speed up and pass the bus', 4),
+('D', 'Stop and wait until the red lights stop flashing', 4),
+
+('A', 'To stop all traffic', 5),
+('B', 'To warn drivers about upcoming road work', 5),
+('C', 'To let drivers know that they must give the right of way', 5),
+('D', 'To indicate a no passing zone', 5);
+
 INSERT INTO Address (streetNumber, street, city, region) 
 VALUES 
     (1, 'вул. Шевченка', 'Київ', 'Київська область'),
@@ -459,3 +620,7 @@ where examID = 13;
 
 select * from TheoreticalExam;
 select * from Exam;
+
+
+
+
