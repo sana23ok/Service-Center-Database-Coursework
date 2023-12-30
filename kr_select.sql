@@ -39,29 +39,32 @@ JOIN Voucher v ON v.centerID = s.centerID
 JOIN Candidate c ON c.TIN = v.TIN
 WHERE a.city LIKE 'К%';
 
--- 5) Вивести дані про кандидатів, які пройшли практичний екзамен на транспортному засобі з моделлю "Toyota".
+-- 5) Вивести дані про кандидатів, які пройшли практичний екзамен 
+--на транспортному засобі з моделлю "Toyota".
 
-SELECT CONCAT(' ', c.surname, c.firstname) AS FullName
+SELECT CONCAT_WS(' ', c.surname, c.firstname) AS FullName
 FROM Candidate c
 JOIN Voucher v ON c.TIN = v.TIN
 JOIN Exam e ON v.voucherID = e.voucherID
 JOIN PracticalExam pe ON e.examID = pe.examID
-JOIN TransportVehicle tv ON pe.examID = tv.instructorID
+JOIN PracticalExam_TransportVehicle ptv ON pe.practicalExamID = ptv.practicalExamID
+JOIN TransportVehicle tv ON ptv.registrationPlate = tv.registrationPlate
 WHERE tv.brand = 'Toyota';
 
-select * from TransportVehicle;
 
 -- 6) Вивести інформацію про кандидатів та терміни дії їхніх водійських посвідчень.
 
 SELECT c.*, dl.validUntil AS DrivingLicenseExpiration
 FROM Candidate c
-JOIN DriversLicense dl ON c.TIN = dl.ownerID;
+JOIN DriversLicense dl ON c.TIN = dl.ownerID
+ORDER BY c.surname ASC;
 
 -- 7) Показати дані про практичні екзамени та їхні результати.
 
 SELECT pe.*, e.result
 FROM PracticalExam pe
 JOIN Exam e ON pe.examID = e.examID;
+
 
 -- 8) Вивести ім'я та прізвище робітників, які мають зазначені обидва зв'язки: із сервісним центром і автошколою.
 
@@ -101,6 +104,7 @@ WHERE NOT EXISTS (
     FROM Voucher
     WHERE TIN = c.TIN
 );
+
 
 -- 11) Знайти кандидатів, чиї посвідчення вже не дійсні
 
@@ -236,9 +240,3 @@ SELECT
     END AS HigherAvgSalary
 FROM InstructorAvg, ExaminerAvg; 
 
-
--- 22) 
-
-select * from PossibleAnswers;
-
-select * from Question;

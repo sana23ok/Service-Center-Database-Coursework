@@ -6,7 +6,7 @@
 --процедур/функцій різних типів та за суттю; 
 
 -- PROCEDURES 
--- 1) процедура що показує результати екзаменів по вказаному центру 
+-- 1) процедура що показує результати екзаменів по вказаному центру +
 CREATE OR ALTER PROCEDURE GetExamResultsByCenter
     @centerID INT
 AS
@@ -23,7 +23,7 @@ END;
 
 EXEC GetExamResultsByCenter @centerID = 4;
 
--- 2) процедура, що ділить інструкторів за місцем роботити в сервісному центрі або в автошколі 
+-- 2) процедура, що ділить інструкторів за місцем роботити в сервісному центрі або в автошколі +
 
 CREATE PROCEDURE CategorizeInstructors
 AS
@@ -44,7 +44,8 @@ END;
 EXEC CategorizeInstructors;
 
 
--- 3) процедура, яка визначає кількість проведених теоретичних та практичних іспитів за певний день
+-- 3) процедура, яка визначає кількість проведених теоретичних та практичних 
+-- іспитів за певний день +
 
 CREATE OR ALTER PROCEDURE GetExamCountsByDate
     @specificDate DATE
@@ -85,7 +86,7 @@ END;
 EXEC GetCandidatesForPracticalExam;
 
 
--- 5) вибрати кандитатів, що успішно склали екзамени і вже мать посвідчення 
+-- 5) вибрати кандитатів, що успішно склали екзамени і вже мать посвідчення --
 
 CREATE OR ALTER PROCEDURE GetSuccessfulCandidatesWithLicense
 AS
@@ -115,7 +116,7 @@ END;
 EXEC GetSuccessfulCandidatesWithLicense;
 
 
--- 6) процедура для автоматичного заповнення даних на основі даних про талон 
+-- 6) процедура для автоматичного заповнення даних на основі даних про талон --
 CREATE PROCEDURE FillExamsFromVoucher
 AS
 BEGIN
@@ -153,7 +154,7 @@ END;
 
 EXEC FillExamsFromVoucher;
 
--- 7) автоматичне заповнення результаів на основі балу на теооретичному екзамені
+-- 7) автоматичне заповнення результаів на основі балу на теооретичному екзамені +
 CREATE OR ALTER PROCEDURE FillExamResults
 AS
 BEGIN
@@ -168,59 +169,7 @@ END;
 EXEC FillExamResults;
 
 
--- 8) знайти список питань, що були задані конкретному кандидату на теоретичному екзамені 
-
-CREATE OR ALTER PROCEDURE GetTheoreticalExamDetails
-    @TargetTIN BIGINT
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Get the theoretical exam ID for the given person
-    DECLARE @TheoreticalExamID INT;
-
-    SELECT @TheoreticalExamID = te.theoreticalExamID
-    FROM TheoreticalExam te
-    JOIN Exam e ON te.examID = e.examID
-    JOIN Voucher v ON e.voucherID = v.voucherID
-    JOIN Candidate c ON v.TIN = c.TIN
-    WHERE c.TIN = @TargetTIN;
-
-    IF @TheoreticalExamID IS NOT NULL
-    BEGIN
-        -- Get the list of questions, client answers, and correct answers for the theoretical exam
-        SELECT
-            q.text AS Question,
-            ISNULL(a.text, 'Not Answered') AS ClientAnswer,
-            a.isCorrect AS IsCorrectAnswer
-        FROM
-            TheoreticalExam_Question tq
-        JOIN Question q ON tq.questionID = q.questionID
-        LEFT JOIN ClientAnswer ca ON tq.theoreticalExamID = ca.theoreticalExamID
-        LEFT JOIN Answer a ON ca.answerID = a.answerID
-        WHERE
-            tq.theoreticalExamID = @TheoreticalExamID;
-    END
-    ELSE
-    BEGIN
-        PRINT 'Theoretical exam not found for the specified TIN.';
-    END
-END;
-
-
-EXEC GetTheoreticalExamDetails @TargetTIN = 1234563456;
-
-select * from TheoreticalExam;
-
-
-select t.*, c.surname, c.TIN
-from TheoreticalExam t
-join Exam e ON e.examID = t.examID
-join Voucher v on v.voucherID = e.voucherID
-join Candidate c on c.TIN = v.TIN;
-
-
--- 9) Обрахувати результат теоретичного екзамену
+-- 8) Обрахувати результат теоретичного екзамену ++
 -- Create a function to calculate the score for a theoretical exam
 CREATE OR ALTER FUNCTION dbo.CalculateScore(@theoreticalExamID INT)
 RETURNS INT
@@ -253,7 +202,7 @@ SELECT * FROM TheoreticalExam;
 
 -- FUNCTIONS 
 
--- 1)Отримати кількість працівників у конкретному центрі:
+-- 1)Отримати кількість працівників у конкретному центрі: ++
 CREATE OR ALTER FUNCTION GetEmployeeCountInCenter(@centerID INT)
 RETURNS INT
 AS
@@ -267,7 +216,7 @@ DECLARE @count INT;
 EXEC @count = GetEmployeeCountInCenter @centerID = 4;
 SELECT @count AS EmployeeCount;
 
--- 2)Отримати середню зарплатню працівників у певній посаді:
+-- 2)Отримати середню зарплатню працівників у певній посаді: ++
 CREATE OR ALTER FUNCTION GetAverageSalaryForPosition(@positionID INT)
 RETURNS DECIMAL(10, 2)
 AS
@@ -282,7 +231,7 @@ EXEC @avgSalary = GetAverageSalaryForPosition @positionID = 9;
 SELECT @avgSalary AS EmployeeCount;
 
 
--- 3) визначення наявності вільних талонів на певну дату CheckAvailabilityForDate
+-- 3) визначення наявності вільних талонів на певну дату CheckAvailabilityForDate ++
 
 -- Створення функції
 CREATE OR ALTER FUNCTION CheckAvailabilityForDate(@targetDate DATE, @vochersForDay INT)
@@ -309,7 +258,7 @@ SET @voucherCount = dbo.CheckAvailabilityForDate(@dateToCheck, 45);
 PRINT 'Кількість вільних талонів на ' + CONVERT(NVARCHAR, @dateToCheck) + ': ' + CONVERT(NVARCHAR, @voucherCount);
 
 -- 4) створимо функцію, яка підраховує кількість здач теоретичних і 
--- практичних іспитів для заданого користувача (кандидата)
+-- практичних іспитів для заданого користувача (кандидата) ++
 
 CREATE OR ALTER FUNCTION GetExamsTakenCount
 (
@@ -335,7 +284,7 @@ RETURN
 
 SELECT * FROM GetExamsTakenCount('Malynovska', 'Arina');
 
--- 5) визначити чи  водій має тимсове посвідчення
+-- 5) визначити чи  водій має тимсове посвідчення ++
 
 CREATE OR ALTER FUNCTION GetLicenseType 
 (

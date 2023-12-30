@@ -201,3 +201,93 @@ CREATE TABLE TheoreticalExam_Question (
 	FOREIGN KEY (questionID) REFERENCES Question(questionID)
 );
 
+-- Add ON DELETE CASCADE to existing foreign keys
+ALTER TABLE ServiceCenter
+ADD CONSTRAINT FK_ServiceCenter_Address
+FOREIGN KEY (addressID) REFERENCES Address(addressID) ON DELETE CASCADE;
+
+ALTER TABLE Worker
+ADD CONSTRAINT FK_Worker_ServiceCenter
+FOREIGN KEY (centerID) REFERENCES ServiceCenter(centerID) ON DELETE CASCADE;
+
+ALTER TABLE Worker
+ADD CONSTRAINT FK_Worker_Position
+FOREIGN KEY (positionID) REFERENCES Position(positionID) ON DELETE CASCADE;
+
+ALTER TABLE Candidate
+ADD CONSTRAINT FK_Candidate_MedCard
+FOREIGN KEY (ownerID) REFERENCES MedCard(medCardID) ON DELETE CASCADE;
+
+ALTER TABLE Voucher
+ADD CONSTRAINT FK_Voucher_ServiceCenter
+FOREIGN KEY (centerID) REFERENCES ServiceCenter(centerID) ON DELETE CASCADE;
+
+ALTER TABLE Voucher
+ADD CONSTRAINT FK_Voucher_Candidate
+FOREIGN KEY (TIN) REFERENCES Candidate(TIN) ON DELETE CASCADE;
+
+ALTER TABLE Exam
+ADD CONSTRAINT FK_Exam_Worker
+FOREIGN KEY (examinerID) REFERENCES Worker(workerID) ON DELETE CASCADE;
+
+-------
+ALTER TABLE Exam
+ADD CONSTRAINT FK_Exam_Voucher
+FOREIGN KEY (voucherID) REFERENCES Voucher(voucherID) ON DELETE CASCADE;
+-------
+
+
+ALTER TABLE PracticalExam
+ADD CONSTRAINT FK_PracticalExam_Exam
+FOREIGN KEY (examID) REFERENCES Exam(examID) ON DELETE CASCADE;
+
+ALTER TABLE TransportVehicle
+ADD CONSTRAINT FK_TransportVehicle_Worker
+FOREIGN KEY (instructorID) REFERENCES Worker(workerID) ON DELETE CASCADE;
+
+ALTER TABLE DriversLicense
+ADD CONSTRAINT FK_DriversLicense_Candidate
+FOREIGN KEY (ownerID) REFERENCES Candidate(TIN) ON DELETE CASCADE;
+
+ALTER TABLE PracticalExam_TransportVehicle
+ADD CONSTRAINT FK_PE_TV_PracticalExam
+FOREIGN KEY (practicalExamID) REFERENCES PracticalExam(practicalExamID) ON DELETE CASCADE;
+
+----
+ALTER TABLE PracticalExam_TransportVehicle
+DROP FOREIGN KEY /* CONSTRAINT FK_PE_TV_TransportVehicle */;
+
+-- Add the foreign key constraint with ON DELETE NO ACTION
+ALTER TABLE PracticalExam_TransportVehicle
+ADD CONSTRAINT FK_PE_TV_TransportVehicle
+FOREIGN KEY (registrationPlate) REFERENCES TransportVehicle(registrationPlate)
+ON DELETE NO ACTION;
+
+exec sp_columns 'PracticalExam_TransportVehicle';
+-----
+
+ALTER TABLE TheoreticalExam
+ADD CONSTRAINT FK_TheoreticalExam_Exam
+FOREIGN KEY (examID) REFERENCES Exam(examID) ON DELETE CASCADE;
+
+ALTER TABLE Answer
+ADD CONSTRAINT FK_Answer_Question
+FOREIGN KEY (questionID) REFERENCES Question(questionID) ON DELETE CASCADE;
+
+ALTER TABLE Answer
+ADD CONSTRAINT FK_Answer_TheoreticalExam
+FOREIGN KEY (theoreticalExamID) REFERENCES TheoreticalExam(theoreticalExamID) ON DELETE CASCADE;
+
+----
+ALTER TABLE PossibleAnswers
+ADD CONSTRAINT FK_PossibleAnswers_Question
+FOREIGN KEY (questionID) REFERENCES Question(questionID) ON DELETE CASCADE;
+----
+
+ALTER TABLE TheoreticalExam_Question
+ADD CONSTRAINT FK_TE_Question
+FOREIGN KEY (theoreticalExamID) REFERENCES TheoreticalExam(theoreticalExamID) ON DELETE CASCADE;
+
+ALTER TABLE TheoreticalExam_Question
+ADD CONSTRAINT FK_TEQ_Question
+FOREIGN KEY (questionID) REFERENCES Question(questionID) ON DELETE CASCADE;

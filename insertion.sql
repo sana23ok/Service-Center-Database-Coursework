@@ -163,7 +163,7 @@ VALUES
 
 INSERT INTO Address (streetNumber, street, city, region) 
 VALUES 
-    (1, 'вул. Шевченка', 'Київ', 'Київська область'),
+    (100, 'вул. Технічна', 'Сарни', 'Рівненська область'),
     (5, 'вул. Лесі Українки', 'Харків', 'Харківська область'),
     (23, 'просп. Свободи', 'Львів', 'Львівська область'),
     (12, 'вул. Івана Франка', 'Одеса', 'Одеська область'),
@@ -174,9 +174,11 @@ VALUES
     (25, 'пр. Перемоги', 'Харків', 'Харківська область'),
     (7, 'вул. Космонавтів', 'Одеса', 'Одеська область');
 
+	select * from Address;
+
 INSERT INTO ServiceCenter (phoneNumber, email, addressID)
 VALUES 
-    ('234-567-8901', 'serviceKharkiv@example.com', 2),
+    ('334-332-8901', 'serviceSarny@example.com', 11),
     ('345-678-9012', 'serviceLviv@example.com', 3),
     ('456-789-0123', 'serviceOdessa@example.com', 4),
     ('567-890-1234', 'serviceDnipro@example.com', 5),
@@ -200,19 +202,15 @@ VALUES
     ('Network Support Technician', 42000.00, 2),
 	('Secretary', 40000.00, 2);
 
+	select * from ServiceCenter;
+
 INSERT INTO Worker (centerID, drivingSchool, surname, firstname, positionID, phoneNumber, email)
 VALUES 
-    (3, NULL, 'Ivanov', 'Oleksandr', 1, '+380951234567', 'oleksandr.ivanov@example.com'),
-    (3, NULL, 'Petrenko', 'Yulia', 2, '+380952345678', 'yulia.petrenko@example.com'),
-    (3, NULL, 'Koval', 'Maxim', 3, '+380953456789', 'maxim.koval@example.com'),
-    (NULL, 'Pilot', 'Sydorenko', 'Anna', 9, '+380954567890', 'anna.sydorenko@example.com'),
-    (4, NULL, 'Pavlenko', 'Oleg', 5, '+380955678901', 'oleg.pavlenko@example.com'),
-    (4, NULL, 'Sergienko', 'Irina', 6, '+380956789012', 'irina.sergienko@example.com'),
-    (NULL, 'Safe Academy', 'Martynenko', 'Vitaliy', 9, '+380957890123', 'vitaliy.martynenko@example.com'),
-    (6, NULL, 'Tkachenko', 'Darina', 8, '+380958901234', 'darina.tkachenko@example.com'),
-    (7, NULL, 'Romanova', 'Vladyslava', 9, '+380959012345', 'vlada.romanova@example.com'),
-    (NULL, 'Safe Academy', 'Kovalenko', 'Irina', 9, '+380951112233', 'irina.kovalenko@example.com'),
-    (8, NULL, 'Karpenko', 'Vasyl', 11, '+380951234567', 'vasyl.karpenko@example.com');
+    (10, NULL, 'Shevchenko', 'Igor', 1, '+380956789012', 'igor.shevchenko@example.com'),
+    (10, NULL, 'Tiomina', 'Kateryna', 1, '+380957890123', 'tiomina_kat@example.com'),
+    (10, NULL, 'Boyko', 'Vladimir', 7, '+380958901234', 'vladimir.boyko@example.com'),
+    (NULL, 'Pilot', 'Hrynevych', 'Anatolii', 13, '+380959012345', 'hrynevych.AI@example.com'),
+    (10, NULL, 'Kovalenko', 'Olexandr', 8, '+380950123456', 'sasha.kovalenko@example.com');
 
 INSERT INTO MedCard (bloodType, Rh, issueDate)
 VALUES 
@@ -260,16 +258,6 @@ select * from Candidate; -- 1 - 15
 -- Generate 15 vouchers using TIN from the Candidate table
 INSERT INTO Voucher (TIN, datetimeOfReciving, centerID, payment, fee, terms)
 VALUES 
-    (1234563456, GETDATE(), 3, 13, 20, 'Standard terms'),
-    (2345672525, GETDATE(), 3, 13, 20, 'Standard terms'),
-    (3456780202, GETDATE(), 3, 13, 20, 'Standard terms'),
-    (4567891111, GETDATE(), 3, 13, 20, 'Standard terms'),
-    (5678111190, GETDATE(), 4, 33, 800, 'Standard terms'),
-    (6111178901, GETDATE(), 4, 33, 800, 'Standard terms'),
-    (7890111112, GETDATE(), 4, 33, 300, 'Standard terms'),
-    (8911110123, GETDATE(), 5, 33, 800, 'Standard terms'),
-    (9012311114, GETDATE(), 6, 33, 800, 'Standard terms'),
-    (1121111233, GETDATE(), 6, 33, 800, 'Standard terms'),
     (0011445566, '2023-04-10', 6, 13, 20, 'Standard terms'),
     (0011445566, '2023-05-12', 6, 13, 20, 'Standard terms'),
     (0011445566, GETDATE(), 7, 13, 20, 'Standard terms'),

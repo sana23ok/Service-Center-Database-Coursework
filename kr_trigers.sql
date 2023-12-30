@@ -1,7 +1,7 @@
 use MSVServiceCenter;
 
 -- 1) Перевірка бізнес правила, яке стверджує, що посвідчення може бути видане лише 
--- після успішної здачі обох типів іспитів 
+-- після успішної здачі обох типів іспитів ++
 
 CREATE OR ALTER TRIGGER CheckSuccessfulExams
 ON DriversLicense
@@ -47,7 +47,7 @@ WHERE seriesAndNumber = 'DL17';
 INSERT INTO DriversLicense (seriesAndNumber, validityPeriod, issueDate, ownerID, category)
 VALUES ('DL17', 2, '2023-12-29', 111223344, 'B');
 
--- 2) перевірка того, чи теоретичний екзамен містив 20 питань 
+-- 2) перевірка того, чи теоретичний екзамен містив 20 питань +
 
 CREATE OR ALTER TRIGGER CheckTheorExamQuestionCount
 ON TheoreticalExam_Question
@@ -79,8 +79,7 @@ VALUES
 (1, 21);
 
 
-
--- 3) автоматична вставка часу вказаного в талоні, якщо час не заданий при вставці
+-- 3) автоматична вставка часу вказаного в талоні, якщо час не заданий при вставці +
 
 CREATE TRIGGER trg_InsertExam
 ON Voucher
@@ -94,25 +93,8 @@ BEGIN
 	WHERE e.voucherID = i.voucherID AND e.datetimeOfExam IS NOT NULL);
 END;
 
--- 4) тригер, що перевіряє чи не призначено 2 талони інстуктора чи екзаменатора одночасно на 2 екзамени
-
---CREATE OR ALTER TRIGGER PreventOverlapExams
---ON Exam
---FOR INSERT, UPDATE
---AS
---BEGIN
---    IF EXISTS (
---        SELECT 1
---        FROM inserted i
---        JOIN Exam e ON i.examinerID = e.examinerID AND i.datetimeOfExam = e.datetimeOfExam
---        WHERE i.examID <> e.examID
---    )
---    BEGIN
---        RAISERROR ('The examiner is already assigned to another exam at this time.', 16, 1);
---        ROLLBACK TRANSACTION;
---        RETURN;
---    END
---END;
+-- 4) тригер, що перевіряє чи не призначено 2 талони інстуктора 
+-- чи екзаменатора одночасно на 2 практичні екзамени   ++
 
 -- для всього -- переробити для практичного і теоретичного роздільно
 CREATE OR ALTER TRIGGER PreventOverlapExams
@@ -124,6 +106,7 @@ BEGIN
         SELECT 1
         FROM inserted i
         JOIN Exam e ON i.examinerID = e.examinerID 
+		JOIN Voucher v ON v.voucherID = e.voucherID
         WHERE i.examID <> e.examID AND
         (
             -- Check if the new exam starts within 20 minutes of the start of an existing exam
@@ -131,6 +114,8 @@ BEGIN
             -- Check if the new exam ends within 20 minutes of the end of an existing exam
             ABS(DATEDIFF(MINUTE, DATEADD(MINUTE, 20, i.datetimeOfExam), DATEADD(MINUTE, 20, e.datetimeOfExam))) < 20
         )
+		
+		AND v.ServiceType = 'practical exam'
     )
     BEGIN
         RAISERROR ('The examiner is already assigned to another exam at this time.', 16, 1);
@@ -147,7 +132,7 @@ set examinerID = 63
 where examID = 16;
 
 -- 5) тригер, що перевіряє чи не викоритовується ТЗ юільше чим на 1 екзамені, що проходить 
--- в зазначений час 
+-- в зазначений час -+
 
 CREATE OR ALTER TRIGGER CheckVehicleUsage
 ON PracticalExam_TransportVehicle
@@ -169,10 +154,32 @@ BEGIN
 END;
 
 
--- 6) тригер на видалення даних
+-- 6) тригер на видалення даних +
+
+-- create tigger which doesnt allows delete possible all answers on questions if 
+-- that question is present in table Question, so in table POssible answers must be at 
+-- leat 2 possible answers
+
+CREATE OR ALTER TRIGGER AfterDeletePossibleAnswer
+ON PossibleAnswers
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Reinsert the deleted records back into the PossibleAnswers table
+    INSERT INTO PossibleAnswers (questionID, letter, text)
+    SELECT questionID, letter, text
+    FROM deleted;
+END;
+
+delete from PossibleAnswers
+where questionID = 1;
+
+select * from PossibleAnswers;
 
 
--- 7)тригер, який перевірятиме чи є екзаменатор працівником центру, де проводиться екзамен
+-- 7)тригер, який перевірятиме чи є екзаменатор працівником центру, де проводиться екзамен +
 
 CREATE OR ALTER TRIGGER CheckExaminerServiceCenter
 ON Exam
@@ -203,11 +210,7 @@ select * from Exam e
 join Voucher v on v.voucherID = e.voucherID
 where v.centerID != 4;
 
--- 8) перевірка дати отримання мед карти
-
-
-
--- 9) тригер для автоматичного розрухування ціни за типом послуг 
+-- 9) тригер для автоматичного розрухування ціни за типом послуг +
 
 CREATE OR ALTER TRIGGER Voucher_AfterInsert
 ON Voucher
@@ -231,5 +234,7 @@ BEGIN
     FROM Voucher V
     INNER JOIN inserted i ON V.VoucherID = i.VoucherID;
 END;
+
+
 
 
