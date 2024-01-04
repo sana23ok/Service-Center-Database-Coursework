@@ -1,12 +1,142 @@
 ﻿use MSVServiceCenter;
 
-
 --− використання збережених процедур/функцій. При розробці бази
 --даних повинно бути реалізовано щонайменше 10 збережених 
 --процедур/функцій різних типів та за суттю; 
 
--- PROCEDURES 
--- 1) процедура що показує результати екзаменів по вказаному центру +
+--8.1 Створення функцій 
+--8.1.1 Функція GetEmployeeCountInCenter
+CREATE OR ALTER FUNCTION GetEmployeeCountInCenter(@centerID INT)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @employeeCount INT;
+    SELECT @employeeCount = COUNT(*) FROM Worker WHERE centerID = @centerID;
+    RETURN @employeeCount;
+END;
+
+DECLARE @count INT;
+EXEC @count = GetEmployeeCountInCenter @centerID = 4;
+SELECT @count AS EmployeeCount;
+
+--8.1.2 Функція GetAverageSalaryForPosition
+CREATE OR ALTER FUNCTION GetAverageSalaryForPosition(@positionN VARCHAR(50))
+RETURNS DECIMAL(10, 2)
+AS
+BEGIN
+    DECLARE @averageSalary DECIMAL(10, 2);
+    SELECT @averageSalary = AVG(salary) FROM Position WHERE positionName = @positionN;
+    RETURN @averageSalary;
+END;
+
+DECLARE @avgSalary INT;
+EXEC @avgSalary = GetAverageSalaryForPosition @positionN = 'Instructor';
+SELECT @avgSalary AS EmployeeCount;
+
+select * from Position;
+
+--8.1.3 Функція CheckAvailabilityForDate
+
+CREATE OR ALTER FUNCTION CheckAvailabilityForDate(
+	@targetDate DATE, 
+	@vochersForDay INT
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @count INT;
+    SELECT @count = COUNT(*)
+    FROM Voucher
+    WHERE CONVERT(DATE, datetimeOfReciving) = @targetDate;
+    RETURN @vochersForDay - @count;
+END;
+
+-- Виклик функції і вивід результату
+DECLARE @dateToCheck DATE = '2023-12-24';
+DECLARE @voucherCount INT;
+
+SET @voucherCount = dbo.CheckAvailabilityForDate(@dateToCheck, 45);
+
+PRINT 'Кількість вільних талонів на ' + CONVERT(NVARCHAR, @dateToCheck) + 
+': ' + CONVERT(NVARCHAR, @voucherCount);
+
+select * from Voucher;
+
+--8.1.4 Функція GetExamsTakenCount
+CREATE OR ALTER FUNCTION GetExamsTakenCount
+(
+    @Surname VARCHAR(255),
+    @Firstname VARCHAR(255)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT
+        (SELECT COUNT(*) FROM TheoreticalExam 
+        WHERE examID IN (SELECT examID 
+                         FROM Exam 
+                         WHERE voucherID IN (SELECT voucherID 
+                                            FROM Voucher 
+                                            WHERE TIN = (SELECT TIN 
+                                                         FROM Candidate 
+                                                         WHERE surname = @Surname AND firstname = @Firstname)
+                                                      AND ServiceType = 'theoretical exam'))) 
+        AS TheoreticalExamsTaken,
+
+        (SELECT COUNT(*) FROM PracticalExam 
+        WHERE examID IN (SELECT examID 
+                         FROM Exam 
+                         WHERE voucherID IN (SELECT voucherID 
+                                            FROM Voucher 
+                                            WHERE TIN = (SELECT TIN 
+                                                         FROM Candidate 
+                                                         WHERE surname = @Surname AND firstname = @Firstname)
+                                                      AND ServiceType = 'practical exam'))) 
+        AS PracticalExamsTaken
+);
+
+SELECT * FROM GetExamsTakenCount('Malynovska', 'Arina');
+
+
+--8.1.5 Функція GetLicenseType
+CREATE OR ALTER FUNCTION GetLicenseType 
+(
+    @Firstname VARCHAR(255),
+    @Surname VARCHAR(255)
+)
+RETURNS VARCHAR(20)
+AS
+BEGIN
+    DECLARE @LicenseType VARCHAR(20)
+
+    SELECT @LicenseType = 
+        CASE 
+            WHEN dl.validityPeriod = 2 THEN 'Temporary (2 years)'
+            WHEN dl.validityPeriod = 10 THEN 'Permanent (10 years)'
+            ELSE 'Unknown'
+        END
+    FROM DriversLicense dl
+    INNER JOIN Candidate c ON dl.ownerID = c.TIN
+    WHERE c.firstname = @Firstname AND c.surname = @Surname;
+
+    RETURN @LicenseType;
+END;
+
+
+DECLARE @FirstnameParam VARCHAR(255) = 'Inna'; 
+DECLARE @SurnameParam VARCHAR(255) = 'Pavlova'; 
+DECLARE @Result VARCHAR(20);
+
+SET @Result = dbo.GetLicenseType(@FirstnameParam, @SurnameParam);
+
+PRINT 'License Type: ' + @Result;
+
+select * from DriversLicense d
+join Candidate c on c.TIN = d.ownerID;
+
+--8.2 Створення процедур 
+--8.2.1 Процедура GetExamResultsByCenter
 CREATE OR ALTER PROCEDURE GetExamResultsByCenter
     @centerID INT
 AS
@@ -23,30 +153,26 @@ END;
 
 EXEC GetExamResultsByCenter @centerID = 4;
 
--- 2) процедура, що ділить інструкторів за місцем роботити в сервісному центрі або в автошколі +
-
+--8.2.2 Процедура CategorizeInstructors
 CREATE PROCEDURE CategorizeInstructors
 AS
 BEGIN
-    -- Instructors working in a specific center
     SELECT *
     FROM Worker
     WHERE centerID IS NOT NULL
-      AND positionID IN (SELECT positionID FROM Position WHERE positionName = 'Instructor');
+		AND positionID IN (SELECT positionID FROM Position 
+		WHERE positionName = 'Instructor');
 
-    -- Instructors with a driving school
     SELECT *
     FROM Worker
     WHERE drivingSchool IS NOT NULL
-      AND positionID IN (SELECT positionID FROM Position WHERE positionName = 'Instructor');
+		AND positionID IN (SELECT positionID FROM Position 
+		WHERE positionName = 'Instructor');
 END;
 
 EXEC CategorizeInstructors;
 
-
--- 3) процедура, яка визначає кількість проведених теоретичних та практичних 
--- іспитів за певний день +
-
+--8.2.3 Процедура GetExamCountsByDate
 CREATE OR ALTER PROCEDURE GetExamCountsByDate
     @specificDate DATE
 AS
@@ -64,28 +190,76 @@ BEGIN
     WHERE CONVERT(DATE, E.datetimeOfExam) = @specificDate;
 END;
 
-EXEC GetExamCountsByDate  @specificDate = '2023-12-25';
+EXEC GetExamCountsByDate  @specificDate = '2023-12-24';
 
-select * from Exam;
+select * from Exam where CAST(datetimeOfExam as Date)='2023-12-24';
 
--- 4) вибрати кандидатів, що допущені до практичного екзамену
-
-CREATE PROCEDURE GetCandidatesForPracticalExam
+--8.2.4 Процедура GetCandidatesThEx 
+CREATE OR ALTER PROCEDURE GetCandidatesThEx
 AS
 BEGIN
-    -- Кандидати, які успішно склали теоретичний екзамен і допущені до практичного
-    SELECT C.TIN, C.surname, C.firstname
-    FROM Candidate C
-    INNER JOIN Voucher V ON C.TIN = V.TIN
-    INNER JOIN Exam E ON V.voucherID = E.voucherID
-    INNER JOIN TheoreticalExam TE ON E.examID = TE.examID
-    WHERE E.result = 'positive';
-
+	 SELECT C.TIN, C.surname, C.firstname
+	 FROM Candidate C
+	 INNER JOIN Voucher V ON C.TIN = V.TIN
+	 INNER JOIN Exam E ON V.voucherID = E.voucherID
+	 INNER JOIN TheoreticalExam TE ON E.examID = TE.examID
+	 WHERE TE.score >= 18;
 END;
 
-EXEC GetCandidatesForPracticalExam;
+EXEC  GetCandidatesThEx;
+
+--8.2.5 Процедура FillExamResults
+CREATE OR ALTER PROCEDURE FillExamResults
+AS
+BEGIN
+    -- Update Exam table
+    UPDATE Exam
+    SET result = CASE WHEN TheoreticalExam.score >= 18 THEN 'positive' ELSE 'negative' END
+    FROM Exam
+    INNER JOIN TheoreticalExam ON Exam.examID = TheoreticalExam.examID;
+END;
 
 
+EXEC FillExamResults;
+
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------
+-- FUNCTIONS 
+
+CREATE OR ALTER PROCEDURE FillExamResults
+AS
+BEGIN
+    -- Update Exam table
+    UPDATE Exam
+    SET result = CASE WHEN TheoreticalExam.score >= 18 THEN 'positive' ELSE 'negative' END
+    FROM Exam
+    INNER JOIN TheoreticalExam ON Exam.examID = TheoreticalExam.examID;
+END;
+
+exec FillExamResults;
+
+select * from Exam; -- 40 41 42
+
+update TheoreticalExam
+set score = 19 
+where examID in(21, 36, 88)
+
+select t.*, e.result from TheoreticalExam t
+join Exam e on e.examID = t.examID
+where t.examID in(21, 36, 88);
+
+
+---------------------------
 -- 5) вибрати кандитатів, що успішно склали екзамени і вже мать посвідчення --
 
 CREATE OR ALTER PROCEDURE GetSuccessfulCandidatesWithLicense
@@ -154,20 +328,6 @@ END;
 
 EXEC FillExamsFromVoucher;
 
--- 7) автоматичне заповнення результаів на основі балу на теооретичному екзамені +
-CREATE OR ALTER PROCEDURE FillExamResults
-AS
-BEGIN
-    -- Update Exam table
-    UPDATE Exam
-    SET result = CASE WHEN TheoreticalExam.score >= 18 THEN 'positive' ELSE 'negative' END
-    FROM Exam
-    INNER JOIN TheoreticalExam ON Exam.examID = TheoreticalExam.examID;
-END;
-
--- Execute the stored procedure
-EXEC FillExamResults;
-
 
 -- 8) Обрахувати результат теоретичного екзамену ++
 -- Create a function to calculate the score for a theoretical exam
@@ -197,126 +357,3 @@ WHERE theoreticalExamID = @thExID;
 
 -- View the updated TheoreticalExam table
 SELECT * FROM TheoreticalExam;
-
-
-
--- FUNCTIONS 
-
--- 1)Отримати кількість працівників у конкретному центрі: ++
-CREATE OR ALTER FUNCTION GetEmployeeCountInCenter(@centerID INT)
-RETURNS INT
-AS
-BEGIN
-    DECLARE @employeeCount INT;
-    SELECT @employeeCount = COUNT(*) FROM Worker WHERE centerID = @centerID;
-    RETURN @employeeCount;
-END;
-
-DECLARE @count INT;
-EXEC @count = GetEmployeeCountInCenter @centerID = 4;
-SELECT @count AS EmployeeCount;
-
--- 2)Отримати середню зарплатню працівників у певній посаді: ++
-CREATE OR ALTER FUNCTION GetAverageSalaryForPosition(@positionID INT)
-RETURNS DECIMAL(10, 2)
-AS
-BEGIN
-    DECLARE @averageSalary DECIMAL(10, 2);
-    SELECT @averageSalary = AVG(salary) FROM Position WHERE positionID = @positionID;
-    RETURN @averageSalary;
-END;
-
-DECLARE @avgSalary INT;
-EXEC @avgSalary = GetAverageSalaryForPosition @positionID = 9;
-SELECT @avgSalary AS EmployeeCount;
-
-
--- 3) визначення наявності вільних талонів на певну дату CheckAvailabilityForDate ++
-
--- Створення функції
-CREATE OR ALTER FUNCTION CheckAvailabilityForDate(@targetDate DATE, @vochersForDay INT)
-RETURNS INT
-AS
-BEGIN
-    DECLARE @count INT;
-
-    -- Підрахунок кількості талонів на вказану дату
-    SELECT @count = COUNT(*)
-    FROM Voucher
-    WHERE CONVERT(DATE, datetimeOfReciving) = @targetDate;
-
-    -- Повернення результату
-    RETURN @vochersForDay - @count;
-END;
-
--- Виклик функції і вивід результату
-DECLARE @dateToCheck DATE = '2023-12-24';
-DECLARE @voucherCount INT;
-
-SET @voucherCount = dbo.CheckAvailabilityForDate(@dateToCheck, 45);
-
-PRINT 'Кількість вільних талонів на ' + CONVERT(NVARCHAR, @dateToCheck) + ': ' + CONVERT(NVARCHAR, @voucherCount);
-
--- 4) створимо функцію, яка підраховує кількість здач теоретичних і 
--- практичних іспитів для заданого користувача (кандидата) ++
-
-CREATE OR ALTER FUNCTION GetExamsTakenCount
-(
-    @Surname VARCHAR(255),
-    @Firstname VARCHAR(255)
-)
-RETURNS TABLE
-AS
-RETURN
-(
-    SELECT
-        (SELECT COUNT(*) FROM TheoreticalExam WHERE examID IN (SELECT examID 
-		FROM Exam WHERE voucherID IN (SELECT voucherID FROM Voucher 
-		WHERE TIN = (SELECT TIN FROM Candidate 
-		WHERE surname = @Surname AND firstname = @Firstname)))) 
-		AS TheoreticalExamsTaken,
-
-        (SELECT COUNT(*) FROM PracticalExam WHERE examID IN (SELECT examID 
-		FROM Exam WHERE voucherID IN (SELECT voucherID FROM Voucher 
-		WHERE TIN = (SELECT TIN FROM Candidate 
-		WHERE surname = @Surname AND firstname = @Firstname)))) AS PracticalExamsTaken
-);
-
-SELECT * FROM GetExamsTakenCount('Malynovska', 'Arina');
-
--- 5) визначити чи  водій має тимсове посвідчення ++
-
-CREATE OR ALTER FUNCTION GetLicenseType 
-(
-    @Firstname VARCHAR(255),
-    @Surname VARCHAR(255)
-)
-RETURNS VARCHAR(20)
-AS
-BEGIN
-    DECLARE @LicenseType VARCHAR(20)
-
-    SELECT @LicenseType = 
-        CASE 
-            WHEN dl.validityPeriod = 2 THEN 'Temporary (2 years)'
-            WHEN dl.validityPeriod = 10 THEN 'Permanent (10 years)'
-            ELSE 'Unknown'
-        END
-    FROM DriversLicense dl
-    INNER JOIN Candidate c ON dl.ownerID = c.TIN
-    WHERE c.firstname = @Firstname AND c.surname = @Surname;
-
-    RETURN @LicenseType;
-END;
-
-
-DECLARE @FirstnameParam VARCHAR(255) = 'Inna'; 
-DECLARE @SurnameParam VARCHAR(255) = 'Pavlova'; 
-DECLARE @Result VARCHAR(20);
-
-SET @Result = dbo.GetLicenseType(@FirstnameParam, @SurnameParam);
-
-PRINT 'License Type: ' + @Result;
-
-select * from DriversLicense d
-join Candidate c on c.TIN = d.ownerID;

@@ -1,7 +1,7 @@
 use MSVServiceCenter;
 
 -- 1) Перевірка бізнес правила, яке стверджує, що посвідчення може бути видане лише 
--- після успішної здачі обох типів іспитів ++
+-- після успішної здачі обох типів іспитів
 
 CREATE OR ALTER TRIGGER CheckSuccessfulExams
 ON DriversLicense
@@ -43,31 +43,24 @@ select * from Candidate;
 DELETE FROM DriversLicense
 WHERE seriesAndNumber = 'DL17';
 
--- Insert into DriversLicense table
 INSERT INTO DriversLicense (seriesAndNumber, validityPeriod, issueDate, ownerID, category)
 VALUES ('DL17', 2, '2023-12-29', 111223344, 'B');
 
--- 2) перевірка того, чи теоретичний екзамен містив 20 питань +
-
+-- 2) перевірка того, чи теоретичний екзамен містив 20 питань 
 CREATE OR ALTER TRIGGER CheckTheorExamQuestionCount
 ON TheoreticalExam_Question
 AFTER INSERT, UPDATE
 AS 
 BEGIN
     DECLARE @TheoreticalExamID INT;
-
     SELECT @TheoreticalExamID = TheoreticalExamID
     FROM inserted;
-
     DECLARE @QuestionCount INT;
-
     SELECT @QuestionCount = COUNT(*)
     FROM TheoreticalExam_Question
     WHERE TheoreticalExamID = @TheoreticalExamID;
-
     IF @QuestionCount > 20
     BEGIN
-        -- Raise an error and rollback the transaction
         PRINT('Theoretical exam must include exactly 20 questions!');
         ROLLBACK;
         RETURN;
@@ -79,8 +72,7 @@ VALUES
 (1, 21);
 
 
--- 3) автоматична вставка часу вказаного в талоні, якщо час не заданий при вставці +
-
+-- 3) автоматична вставка часу вказаного в талоні, якщо час не заданий при вставці 
 CREATE TRIGGER trg_InsertExam
 ON Voucher
 AFTER INSERT
@@ -93,10 +85,19 @@ BEGIN
 	WHERE e.voucherID = i.voucherID AND e.datetimeOfExam IS NOT NULL);
 END;
 
--- 4) тригер, що перевіряє чи не призначено 2 талони інстуктора 
--- чи екзаменатора одночасно на 2 практичні екзамени   ++
+select * from Candidate;
 
--- для всього -- переробити для практичного і теоретичного роздільно
+INSERT INTO Voucher (TIN, datetimeOfReciving, centerID, payment, fee, terms, examDateTime, ServiceType)
+VALUES (17, '2024-01-04T14:00:00', 1, 100.00, 50.00, 
+'Sample terms', '2024-01-05T10:00:00', 'theoretical exam');
+
+select * from Voucher;
+
+select * from Exam where voucherID = 240;
+
+-- 4) тригер, що перевіряє чи не призначено 2 талони інстуктора 
+-- чи екзаменатора одночасно на 2 практичні екзамени 
+
 CREATE OR ALTER TRIGGER PreventOverlapExams
 ON Exam
 FOR INSERT, UPDATE
@@ -109,12 +110,9 @@ BEGIN
 		JOIN Voucher v ON v.voucherID = e.voucherID
         WHERE i.examID <> e.examID AND
         (
-            -- Check if the new exam starts within 20 minutes of the start of an existing exam
-            ABS(DATEDIFF(MINUTE, i.datetimeOfExam, e.datetimeOfExam)) < 20 OR
-            -- Check if the new exam ends within 20 minutes of the end of an existing exam
+			ABS(DATEDIFF(MINUTE, i.datetimeOfExam, e.datetimeOfExam)) < 20 OR
             ABS(DATEDIFF(MINUTE, DATEADD(MINUTE, 20, i.datetimeOfExam), DATEADD(MINUTE, 20, e.datetimeOfExam))) < 20
         )
-		
 		AND v.ServiceType = 'practical exam'
     )
     BEGIN
@@ -125,41 +123,20 @@ BEGIN
 END;
 
 
-select * from Exam;
+select * from Exam where datetimeOfExam='2023-12-28 15:58:28.027';
 
 update Exam 
 set examinerID = 63
-where examID = 16;
+where examID = 81;
 
--- 5) тригер, що перевіряє чи не викоритовується ТЗ юільше чим на 1 екзамені, що проходить 
--- в зазначений час -+
+select * from Voucher where voucherID in(4, 91);
 
-CREATE OR ALTER TRIGGER CheckVehicleUsage
-ON PracticalExam_TransportVehicle
-AFTER INSERT, UPDATE
-AS
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM PracticalExam_TransportVehicle AS PETV1
-        JOIN PracticalExam_TransportVehicle AS PETV2 ON PETV1.registrationPlate = PETV2.registrationPlate
-        JOIN Exam AS E1 ON PETV1.practicalExamID = E1.examID
-        JOIN Exam AS E2 ON PETV2.practicalExamID = E2.examID
-        WHERE E1.datetimeOfExam = E2.datetimeOfExam
-    )
-    BEGIN
-        RAISERROR ('A vehicle cannot be used in more than one exam at the same time.', 16, 1);
-        ROLLBACK TRANSACTION;
-    END
-END;
+update Voucher 
+set ServiceType = 'practical exam'
+where voucherID = 4;
 
 
--- 6) тригер на видалення даних +
-
--- create tigger which doesnt allows delete possible all answers on questions if 
--- that question is present in table Question, so in table POssible answers must be at 
--- leat 2 possible answers
-
+-- 5) тригер на видалення даних 
 CREATE OR ALTER TRIGGER AfterDeletePossibleAnswer
 ON PossibleAnswers
 AFTER DELETE
@@ -167,20 +144,24 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Reinsert the deleted records back into the PossibleAnswers table
+    -- Reinsert only two records 
+    ;WITH DeletedWithRowNumber AS (
+        SELECT questionID, letter, text,
+               ROW_NUMBER() OVER (PARTITION BY questionID ORDER BY (SELECT NULL)) AS RowNum
+        FROM deleted
+    )
     INSERT INTO PossibleAnswers (questionID, letter, text)
     SELECT questionID, letter, text
-    FROM deleted;
+    FROM DeletedWithRowNumber
+    WHERE RowNum <= 2;
 END;
 
 delete from PossibleAnswers
-where questionID = 1;
+where questionID = 2;
 
 select * from PossibleAnswers;
 
-
--- 7)тригер, який перевірятиме чи є екзаменатор працівником центру, де проводиться екзамен +
-
+-- 6)тригер, який перевірятиме чи є екзаменатор працівником центру, де проводиться екзамен 
 CREATE OR ALTER TRIGGER CheckExaminerServiceCenter
 ON Exam
 AFTER INSERT, UPDATE
@@ -210,8 +191,7 @@ select * from Exam e
 join Voucher v on v.voucherID = e.voucherID
 where v.centerID != 4;
 
--- 9) тригер для автоматичного розрухування ціни за типом послуг +
-
+-- 7) тригер для автоматичного розрухування ціни за типом послуг
 CREATE OR ALTER TRIGGER Voucher_AfterInsert
 ON Voucher
 AFTER INSERT, UPDATE
@@ -234,6 +214,52 @@ BEGIN
     FROM Voucher V
     INNER JOIN inserted i ON V.VoucherID = i.VoucherID;
 END;
+
+
+INSERT INTO Voucher (TIN, datetimeOfReciving, centerID, payment, fee, terms, examDateTime, ServiceType)
+VALUES (17, '2024-01-04T14:00:00', 1, 100.00, 50.00, 
+'Sample terms', '2024-01-05T10:00:00', 'theoretical exam');
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------------
+
+
+-- 5) тригер, що перевіряє чи не викоритовується ТЗ юільше чим на 1 екзамені, що проходить 
+-- в зазначений час -+
+
+CREATE OR ALTER TRIGGER CheckVehicleUsage
+ON PracticalExam_TransportVehicle
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM PracticalExam_TransportVehicle AS PETV1
+        JOIN PracticalExam_TransportVehicle AS PETV2 ON PETV1.registrationPlate = PETV2.registrationPlate
+        JOIN Exam AS E1 ON PETV1.practicalExamID = E1.examID
+        JOIN Exam AS E2 ON PETV2.practicalExamID = E2.examID
+        WHERE E1.datetimeOfExam = E2.datetimeOfExam
+    )
+    BEGIN
+        RAISERROR ('A vehicle cannot be used in more than one exam at the same time.', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+
+select * from PracticalExam
+
+
 
 
 

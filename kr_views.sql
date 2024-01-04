@@ -61,6 +61,7 @@ select * from MedCardDetails;
 
 
 -- 4) Детальна інформація про водійські посвідчення та їх власників з інформацією про медичні картки
+
 CREATE OR ALTER VIEW DriversLicenseDetails AS
 SELECT
     CONCAT_WS(' ', c.surname, c.firstname) AS OwnerName,

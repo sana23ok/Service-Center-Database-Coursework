@@ -16,6 +16,8 @@ CREATE TABLE Address (
     region VARCHAR(100) NOT NULL
 );
 
+exec sp_columns 'Address';
+
 CREATE TABLE ServiceCenter (
     centerID INT IDENTITY(1,1) PRIMARY KEY,
     phoneNumber VARCHAR(15),
@@ -150,15 +152,6 @@ CREATE TABLE DriversLicense (
         FOREIGN KEY (ownerID) REFERENCES Candidate(TIN)
 );
 
--- Linking table for the many-to-many relationship
-CREATE TABLE PracticalExam_TransportVehicle (
-    practicalExamID INT NOT NULL,
-    registrationPlate VARCHAR(15) NOT NULL,
-    PRIMARY KEY (practicalExamID, registrationPlate),
-    FOREIGN KEY (practicalExamID) REFERENCES PracticalExam(practicalExamID),
-    FOREIGN KEY (registrationPlate) REFERENCES TransportVehicle(registrationPlate)
-);
-
 -- Таблиця з теоретичними екзаменами
 CREATE TABLE TheoreticalExam (
     theoreticalExamID INT IDENTITY(1,1) PRIMARY KEY,
@@ -191,6 +184,14 @@ CREATE TABLE PossibleAnswers (
     FOREIGN KEY (questionID) REFERENCES Question(questionID) ON DELETE CASCADE
 );
 
+-- Linking table for the many-to-many relationship
+CREATE TABLE PracticalExam_TransportVehicle (
+    practicalExamID INT NOT NULL,
+    registrationPlate VARCHAR(15) NOT NULL,
+    PRIMARY KEY (practicalExamID, registrationPlate),
+    FOREIGN KEY (practicalExamID) REFERENCES PracticalExam(practicalExamID),
+    FOREIGN KEY (registrationPlate) REFERENCES TransportVehicle(registrationPlate)
+);
 
 -- Таблиця для зв'язку теоретичного екзамену із запитаннями
 CREATE TABLE TheoreticalExam_Question (
