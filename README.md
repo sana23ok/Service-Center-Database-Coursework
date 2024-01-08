@@ -8,7 +8,7 @@ This database, named ServiceCenter, is designed to support the activities of a M
 
 ## ER-model
 
-![ER-model](img/Система сервісного центру.png)
+![ER-model](img/er.png)
 
 ### Tables
 
