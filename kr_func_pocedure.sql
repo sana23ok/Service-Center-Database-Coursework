@@ -222,19 +222,7 @@ END;
 
 EXEC FillExamResults;
 
-
-
-
-
-
-
-
-
-
-
-
 -----------------------------------------------
--- FUNCTIONS 
 
 CREATE OR ALTER PROCEDURE FillExamResults
 AS
@@ -357,3 +345,5 @@ WHERE theoreticalExamID = @thExID;
 
 -- View the updated TheoreticalExam table
 SELECT * FROM TheoreticalExam;
+
+

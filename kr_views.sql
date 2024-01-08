@@ -1,10 +1,3 @@
-use MSVServiceCenter;
-
--- використання представлень. При розробці бази даних повинно бути 
--- створено щонайменше 3 представлення;
-
-
--- 1) детальна інформація про працівників 
 CREATE VIEW WorkerDetails
 AS 
 SELECT 
@@ -24,8 +17,6 @@ LEFT JOIN Address a ON c.addressID = a.addressID;
 SELECT * FROM WorkerDetails;
 
 
--- 2)Детальна інформація про проведені екзамени екзаменаторами
-
 CREATE VIEW ExamsConductedByExaminers AS
 SELECT
     CONCAT_WS(' ', c.surname, c.firstname) AS CandidateName,
@@ -40,10 +31,8 @@ JOIN Exam e ON ed.workerID = e.examinerID
 JOIN Voucher v ON e.voucherID = v.voucherID
 JOIN Candidate c ON v.TIN = c.TIN;
 
--- Вивести дані з нового представлення
 SELECT * FROM ExamsConductedByExaminers;
 
--- 3) деталі медичних даних
 
 CREATE VIEW MedCardDetails AS
 SELECT
@@ -59,8 +48,6 @@ JOIN Candidate c ON mc.medCardID = c.ownerID;
 
 select * from MedCardDetails;
 
-
--- 4) Детальна інформація про водійські посвідчення та їх власників з інформацією про медичні картки
 
 CREATE OR ALTER VIEW DriversLicenseDetails AS
 SELECT

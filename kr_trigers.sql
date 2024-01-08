@@ -1,8 +1,3 @@
-use MSVServiceCenter;
-
--- 1) Перевірка бізнес правила, яке стверджує, що посвідчення може бути видане лише 
--- після успішної здачі обох типів іспитів
-
 CREATE OR ALTER TRIGGER CheckSuccessfulExams
 ON DriversLicense
 AFTER INSERT, UPDATE
@@ -46,7 +41,7 @@ WHERE seriesAndNumber = 'DL17';
 INSERT INTO DriversLicense (seriesAndNumber, validityPeriod, issueDate, ownerID, category)
 VALUES ('DL17', 2, '2023-12-29', 111223344, 'B');
 
--- 2) перевірка того, чи теоретичний екзамен містив 20 питань 
+
 CREATE OR ALTER TRIGGER CheckTheorExamQuestionCount
 ON TheoreticalExam_Question
 AFTER INSERT, UPDATE
@@ -69,10 +64,12 @@ END;
 
 INSERT INTO TheoreticalExam_Question (theoreticalExamID, questionID)
 VALUES 
-(1, 21);
+(116, 21);
+
+select * from TheoreticalExam;
+select * from TheoreticalExam_Question;
 
 
--- 3) автоматична вставка часу вказаного в талоні, якщо час не заданий при вставці 
 CREATE TRIGGER trg_InsertExam
 ON Voucher
 AFTER INSERT
@@ -87,16 +84,14 @@ END;
 
 select * from Candidate;
 
-INSERT INTO Voucher (TIN, datetimeOfReciving, centerID, payment, fee, terms, examDateTime, ServiceType)
-VALUES (17, '2024-01-04T14:00:00', 1, 100.00, 50.00, 
+INSERT INTO Voucher (TIN, datetimeOfReciving, centerID,  terms, examDateTime, ServiceType)
+VALUES (17, '2024-01-04T14:00:00', 1, 
 'Sample terms', '2024-01-05T10:00:00', 'theoretical exam');
 
 select * from Voucher;
 
 select * from Exam where voucherID = 240;
 
--- 4) тригер, що перевіряє чи не призначено 2 талони інстуктора 
--- чи екзаменатора одночасно на 2 практичні екзамени 
 
 CREATE OR ALTER TRIGGER PreventOverlapExams
 ON Exam
@@ -123,20 +118,20 @@ BEGIN
 END;
 
 
-select * from Exam where datetimeOfExam='2023-12-28 15:58:28.027';
+select * from Exam where datetimeOfExam='2023-12-26 15:00:00.000';
+
 
 update Exam 
-set examinerID = 63
-where examID = 81;
+set examinerID = 4
+where examID = 343;
 
-select * from Voucher where voucherID in(4, 91);
+select * from Exam;
 
 update Voucher 
 set ServiceType = 'practical exam'
 where voucherID = 4;
 
 
--- 5) тригер на видалення даних 
 CREATE OR ALTER TRIGGER AfterDeletePossibleAnswer
 ON PossibleAnswers
 AFTER DELETE
@@ -161,7 +156,7 @@ where questionID = 2;
 
 select * from PossibleAnswers;
 
--- 6)тригер, який перевірятиме чи є екзаменатор працівником центру, де проводиться екзамен 
+
 CREATE OR ALTER TRIGGER CheckExaminerServiceCenter
 ON Exam
 AFTER INSERT, UPDATE
@@ -184,14 +179,11 @@ END;
 select * from worker where centerID = 4;
 
 update Exam 
-set examinerID = 25
-where examID = 13;
+set examinerID = 3
+where examID = 343;
 
-select * from Exam e
-join Voucher v on v.voucherID = e.voucherID
-where v.centerID != 4;
 
--- 7) тригер для автоматичного розрухування ціни за типом послуг
+
 CREATE OR ALTER TRIGGER Voucher_AfterInsert
 ON Voucher
 AFTER INSERT, UPDATE
@@ -216,9 +208,8 @@ BEGIN
 END;
 
 
-INSERT INTO Voucher (TIN, datetimeOfReciving, centerID, payment, fee, terms, examDateTime, ServiceType)
-VALUES (17, '2024-01-04T14:00:00', 1, 100.00, 50.00, 
-'Sample terms', '2024-01-05T10:00:00', 'theoretical exam');
+INSERT INTO Voucher (TIN, datetimeOfReciving, centerID,  terms, examDateTime, ServiceType)
+VALUES (17, '2024-01-04T14:00:00', 1, 'Sample terms', '2024-01-05T10:00:00', 'theoretical exam');
 
 
 
@@ -233,10 +224,6 @@ VALUES (17, '2024-01-04T14:00:00', 1, 100.00, 50.00,
 
 
 ------------------------------------------------
-
-
--- 5) тригер, що перевіряє чи не викоритовується ТЗ юільше чим на 1 екзамені, що проходить 
--- в зазначений час -+
 
 CREATE OR ALTER TRIGGER CheckVehicleUsage
 ON PracticalExam_TransportVehicle
@@ -258,6 +245,30 @@ BEGIN
 END;
 
 select * from PracticalExam
+
+-- 9) Check if person is not minor
+CREATE TRIGGER CheckAgeTrigger
+ON Candidate
+AFTER INSERT
+AS
+BEGIN
+    -- Check the age of the candidates being inserted
+    IF EXISTS (
+        SELECT 1
+        FROM inserted
+        WHERE DATEDIFF(YEAR, inserted.dateOfBirth, GETDATE()) < 18
+    )
+    BEGIN
+        -- If there are candidates younger than 18, rollback the transaction
+        ROLLBACK;
+        RAISERROR('Candidates must be 18 years or older.', 16, 1);
+    END
+END;
+
+-- Try to Insert a Candidate Younger than 18
+INSERT INTO Candidate (TIN, surname, firstname, dateOfBirth, phoneNumber, ownerID)
+VALUES
+('1234567891', 'Hordych', 'Daryna', '2007-11-01', '(123) 456-7890', 2);
 
 
 

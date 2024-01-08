@@ -1,5 +1,3 @@
-use MSVServiceCenter;
-
 CREATE ROLE SysAdminMVS;
 CREATE ROLE WorkerMVS;
 CREATE ROLE ClientMVS;

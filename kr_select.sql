@@ -1,19 +1,17 @@
-use MSVServiceCenter;
+-- * СЃС‚РІРѕСЂРµРЅРЅСЏ РЅРµ РјРµРЅС€Рµ 20 DML-Р·Р°РїРёС‚С–РІ С‚РёРїСѓ SELECT (РЅРµ РІРєР»СЋС‡Р°СЋС‡Рё insert, delete, update) СЂС–Р·РЅРёС… Р·Р° СЃСѓС‚С‚СЋ;
 
--- * створення не менше 20 DML-запитів типу SELECT (не включаючи insert, delete, update) різних за суттю;
+-- * РєС–Р»СЊРєС–СЃС‚СЊ С‚Р°Р±Р»РёС†СЊ, Р°С‚СЂРёР±СѓС‚Рё СЏРєРёС… РІРёРєРѕСЂРёСЃС‚РѕРІСѓСЋС‚СЊСЃСЏ Сѓ Р·Р°РїРёС‚С– РЅРµ РјРµРЅС€Рµ РґРІРѕС…;
 
--- * кількість таблиць, атрибути яких використовуються у запиті не менше двох;
+-- * С‰РѕРЅР°Р№РјРµРЅС€Рµ 4 Р·Р°РїРёС‚Рё РїРѕРІРёРЅРЅС– РІРёРєРѕСЂРёСЃС‚РѕРІСѓРІР°С‚Рё РїС–РґР·Р°РїРёС‚Рё.
 
--- * щонайменше 4 запити повинні використовувати підзапити.
-
--- 1) Вивести всі дані про кандидатів, які мають дійсні медичні картки з заданою групою крові та резусом.
+-- 1) Р’РёРІРµСЃС‚Рё РІСЃС– РґР°РЅС– РїСЂРѕ РєР°РЅРґРёРґР°С‚С–РІ, СЏРєС– РјР°СЋС‚СЊ РґС–Р№СЃРЅС– РјРµРґРёС‡РЅС– РєР°СЂС‚РєРё Р· Р·Р°РґР°РЅРѕСЋ РіСЂСѓРїРѕСЋ РєСЂРѕРІС– С‚Р° СЂРµР·СѓСЃРѕРј.
 
 SELECT *
 FROM Candidate c
 JOIN MedCard m ON c.ownerID = m.medCardID
 WHERE m.bloodType = 'A' AND m.Rh = '+';
 
--- 2) Пронумерувати працівників за досвідом у зворотньому порядку
+-- 2) РџСЂРѕРЅСѓРјРµСЂСѓРІР°С‚Рё РїСЂР°С†С–РІРЅРёРєС–РІ Р·Р° РґРѕСЃРІС–РґРѕРј Сѓ Р·РІРѕСЂРѕС‚РЅСЊРѕРјСѓ РїРѕСЂСЏРґРєСѓ
 
 SELECT ROW_NUMBER() OVER (ORDER BY p.experience DESC) AS RowNum,
 w.workerID, CONCAT_WS(' ', w.surname, w.firstname) AS FullName, 
@@ -21,9 +19,9 @@ p.experience
 FROM Worker w
 JOIN Position p on p.positionID = W.positionID;
 
--- 3) Показати інформацію про робітників, зарплата яких більша за середню
+-- 3) РџРѕРєР°Р·Р°С‚Рё С–РЅС„РѕСЂРјР°С†С–СЋ РїСЂРѕ СЂРѕР±С–С‚РЅРёРєС–РІ, Р·Р°СЂРїР»Р°С‚Р° СЏРєРёС… Р±С–Р»СЊС€Р° Р·Р° СЃРµСЂРµРґРЅСЋ
 
--- /ПІДЗАПИТ/
+-- /РџР†Р”Р—РђРџРРў/
 
 SELECT w.firstname, w.surname, p.positionName, p.salary
 FROM Worker w
@@ -31,16 +29,16 @@ JOIN Position p ON w.positionID = p.positionID
 WHERE p.salary > (SELECT AVG(salary) FROM Position);
 
 
--- 4) Знайти всі талони взяті за адресою, де місто починається на 'К'.
+-- 4) Р—РЅР°Р№С‚Рё РІСЃС– С‚Р°Р»РѕРЅРё РІР·СЏС‚С– Р·Р° Р°РґСЂРµСЃРѕСЋ, РґРµ РјС–СЃС‚Рѕ РїРѕС‡РёРЅР°С”С‚СЊСЃСЏ РЅР° 'Рљ'.
 SELECT s.centerID, a.city, a.region, v.voucherID, v.ServiceType
 FROM Address a
 JOIN ServiceCenter s ON s.addressID = a.addressID
 JOIN Voucher v ON v.centerID = s.centerID
 JOIN Candidate c ON c.TIN = v.TIN
-WHERE a.city LIKE 'К%';
+WHERE a.city LIKE 'Рљ%';
 
--- 5) Вивести дані про кандидатів, які пройшли практичний екзамен 
---на транспортному засобі з моделлю "Toyota".
+-- 5) Р’РёРІРµСЃС‚Рё РґР°РЅС– РїСЂРѕ РєР°РЅРґРёРґР°С‚С–РІ, СЏРєС– РїСЂРѕР№С€Р»Рё РїСЂР°РєС‚РёС‡РЅРёР№ РµРєР·Р°РјРµРЅ 
+--РЅР° С‚СЂР°РЅСЃРїРѕСЂС‚РЅРѕРјСѓ Р·Р°СЃРѕР±С– Р· РјРѕРґРµР»Р»СЋ "Toyota".
 
 SELECT CONCAT_WS(' ', c.surname, c.firstname) AS FullName
 FROM Candidate c
@@ -52,21 +50,21 @@ JOIN TransportVehicle tv ON ptv.registrationPlate = tv.registrationPlate
 WHERE tv.brand = 'Toyota';
 
 
--- 6) Вивести інформацію про кандидатів та терміни дії їхніх водійських посвідчень.
+-- 6) Р’РёРІРµСЃС‚Рё С–РЅС„РѕСЂРјР°С†С–СЋ РїСЂРѕ РєР°РЅРґРёРґР°С‚С–РІ С‚Р° С‚РµСЂРјС–РЅРё РґС–С— С—С…РЅС–С… РІРѕРґС–Р№СЃСЊРєРёС… РїРѕСЃРІС–РґС‡РµРЅСЊ.
 
 SELECT c.*, dl.validUntil AS DrivingLicenseExpiration
 FROM Candidate c
 JOIN DriversLicense dl ON c.TIN = dl.ownerID
 ORDER BY c.surname ASC;
 
--- 7) Показати дані про практичні екзамени та їхні результати.
+-- 7) РџРѕРєР°Р·Р°С‚Рё РґР°РЅС– РїСЂРѕ РїСЂР°РєС‚РёС‡РЅС– РµРєР·Р°РјРµРЅРё С‚Р° С—С…РЅС– СЂРµР·СѓР»СЊС‚Р°С‚Рё.
 
 SELECT pe.*, e.result
 FROM PracticalExam pe
 JOIN Exam e ON pe.examID = e.examID;
 
 
--- 8) Вивести ім'я та прізвище робітників, які мають зазначені обидва зв'язки: із сервісним центром і автошколою.
+-- 8) Р’РёРІРµСЃС‚Рё С–Рј'СЏ С‚Р° РїСЂС–Р·РІРёС‰Рµ СЂРѕР±С–С‚РЅРёРєС–РІ, СЏРєС– РјР°СЋС‚СЊ Р·Р°Р·РЅР°С‡РµРЅС– РѕР±РёРґРІР° Р·РІ'СЏР·РєРё: С–Р· СЃРµСЂРІС–СЃРЅРёРј С†РµРЅС‚СЂРѕРј С– Р°РІС‚РѕС€РєРѕР»РѕСЋ.
 
 SELECT
     w.firstname,
@@ -80,9 +78,9 @@ JOIN
 WHERE
     w.centerID IS NOT NULL AND w.drivingSchool IS NOT NULL;
 
--- 9) отримати список центрів, відсортований за сумою зроблених оплат 
+-- 9) РѕС‚СЂРёРјР°С‚Рё СЃРїРёСЃРѕРє С†РµРЅС‚СЂС–РІ, РІС–РґСЃРѕСЂС‚РѕРІР°РЅРёР№ Р·Р° СЃСѓРјРѕСЋ Р·СЂРѕР±Р»РµРЅРёС… РѕРїР»Р°С‚ 
 
--- /ПІДЗАПИТ 2/
+-- /РџР†Р”Р—РђРџРРў 2/
 
 SELECT s.centerID, s.addressID, TotalPayments
 FROM ServiceCenter s
@@ -93,9 +91,9 @@ JOIN (
 ) v ON s.centerID = v.centerID
 ORDER BY TotalPayments DESC;
 
--- 10) Вибрати кандидатів, що зареєстровані в системі, але не мають жодного талона
+-- 10) Р’РёР±СЂР°С‚Рё РєР°РЅРґРёРґР°С‚С–РІ, С‰Рѕ Р·Р°СЂРµС”СЃС‚СЂРѕРІР°РЅС– РІ СЃРёСЃС‚РµРјС–, Р°Р»Рµ РЅРµ РјР°СЋС‚СЊ Р¶РѕРґРЅРѕРіРѕ С‚Р°Р»РѕРЅР°
 
--- /ПІДЗАПИТ 3/
+-- /РџР†Р”Р—РђРџРРў 3/
 
 SELECT TIN, firstname, surname
 FROM Candidate c
@@ -106,9 +104,9 @@ WHERE NOT EXISTS (
 );
 
 
--- 11) Знайти кандидатів, чиї посвідчення вже не дійсні
+-- 11) Р—РЅР°Р№С‚Рё РєР°РЅРґРёРґР°С‚С–РІ, С‡РёС— РїРѕСЃРІС–РґС‡РµРЅРЅСЏ РІР¶Рµ РЅРµ РґС–Р№СЃРЅС–
 
--- /ПІДЗАПИТ 4/
+-- /РџР†Р”Р—РђРџРРў 4/
 SELECT TIN, firstname, surname
 FROM Candidate c
 WHERE EXISTS (
@@ -118,9 +116,9 @@ WHERE EXISTS (
 );
 
 
--- 12) Прахувати кількість працівників у авто школах
+-- 12) РџСЂР°С…СѓРІР°С‚Рё РєС–Р»СЊРєС–СЃС‚СЊ РїСЂР°С†С–РІРЅРёРєС–РІ Сѓ Р°РІС‚Рѕ С€РєРѕР»Р°С…
 
--- /ПІДЗАПИТ 5/
+-- /РџР†Р”Р—РђРџРРў 5/
 SELECT w1.drivingSchool, COUNT(*) AS WorkerCount
 FROM Worker w1
 WHERE EXISTS (
@@ -131,7 +129,7 @@ WHERE EXISTS (
 )
 GROUP BY w1.drivingSchool;
 
--- 13) Вивести працівників з вказаною позицією
+-- 13) Р’РёРІРµСЃС‚Рё РїСЂР°С†С–РІРЅРёРєС–РІ Р· РІРєР°Р·Р°РЅРѕСЋ РїРѕР·РёС†С–С”СЋ
 
 SELECT w.firstname, w.surname, p.positionName
 FROM Worker w
@@ -139,7 +137,7 @@ JOIN Position p ON w.positionID = p.positionID
 WHERE p.positionName = 'Instructor';
 
 
--- 14) Вивести інформацію про практичний екзамен та транспортний засіб, який використовувався
+-- 14) Р’РёРІРµСЃС‚Рё С–РЅС„РѕСЂРјР°С†С–СЋ РїСЂРѕ РїСЂР°РєС‚РёС‡РЅРёР№ РµРєР·Р°РјРµРЅ С‚Р° С‚СЂР°РЅСЃРїРѕСЂС‚РЅРёР№ Р·Р°СЃС–Р±, СЏРєРёР№ РІРёРєРѕСЂРёСЃС‚РѕРІСѓРІР°РІСЃСЏ
 
 SELECT CONCAT_WS(' ', c.surname, c.firstname) as CandidateName, p.practicalExamID, 
 																p.examRoute, tv.model, tv.brand
@@ -151,7 +149,7 @@ JOIN PracticalExam_TransportVehicle petv ON p.practicalExamID = petv.practicalEx
 JOIN TransportVehicle tv ON petv.registrationPlate = tv.registrationPlate;
 
 
---15) обрати питання, що були використані на певному теоретичному екзамені
+--15) РѕР±СЂР°С‚Рё РїРёС‚Р°РЅРЅСЏ, С‰Рѕ Р±СѓР»Рё РІРёРєРѕСЂРёСЃС‚Р°РЅС– РЅР° РїРµРІРЅРѕРјСѓ С‚РµРѕСЂРµС‚РёС‡РЅРѕРјСѓ РµРєР·Р°РјРµРЅС–
 
 SELECT Q.*
 FROM Question Q
@@ -160,22 +158,22 @@ JOIN TheoreticalExam TE ON TEQ.theoreticalExamID = TE.theoreticalExamID
 WHERE TE.theoreticalExamID = 1;
 
 
--- 16) запит вибирає всі теоретичні екзамени, тривалість яких не перевищує 15 хвилин, 
--- і які мають оцінку 18 або вище. Він використовує оператор INTERSECT для вибору спільних
--- записів з обох умов.
+-- 16) Р·Р°РїРёС‚ РІРёР±РёСЂР°С” РІСЃС– С‚РµРѕСЂРµС‚РёС‡РЅС– РµРєР·Р°РјРµРЅРё, С‚СЂРёРІР°Р»С–СЃС‚СЊ СЏРєРёС… РЅРµ РїРµСЂРµРІРёС‰СѓС” 15 С…РІРёР»РёРЅ, 
+-- С– СЏРєС– РјР°СЋС‚СЊ РѕС†С–РЅРєСѓ 18 Р°Р±Рѕ РІРёС‰Рµ. Р’С–РЅ РІРёРєРѕСЂРёСЃС‚РѕРІСѓС” РѕРїРµСЂР°С‚РѕСЂ INTERSECT РґР»СЏ РІРёР±РѕСЂСѓ СЃРїС–Р»СЊРЅРёС…
+-- Р·Р°РїРёСЃС–РІ Р· РѕР±РѕС… СѓРјРѕРІ.
 
 SELECT * FROM TheoreticalExam WHERE duration <= 15
 INTERSECT
 SELECT * FROM TheoreticalExam WHERE score >= 18;
 
--- 17) визначити іспити, за які було отримано оцінку за теоретичний екзамен,
--- а за які не було, тобто екзамен не був практичним 
+-- 17) РІРёР·РЅР°С‡РёС‚Рё С–СЃРїРёС‚Рё, Р·Р° СЏРєС– Р±СѓР»Рѕ РѕС‚СЂРёРјР°РЅРѕ РѕС†С–РЅРєСѓ Р·Р° С‚РµРѕСЂРµС‚РёС‡РЅРёР№ РµРєР·Р°РјРµРЅ,
+-- Р° Р·Р° СЏРєС– РЅРµ Р±СѓР»Рѕ, С‚РѕР±С‚Рѕ РµРєР·Р°РјРµРЅ РЅРµ Р±СѓРІ РїСЂР°РєС‚РёС‡РЅРёРј 
 
 SELECT E.examID, E.voucherID, E.datetimeOfExam, E.result, Th.score
 FROM Exam E
 LEFT JOIN TheoreticalExam Th ON  Th.examID = E.examID;
 
--- 18) порівняти відповіді вказаного коритувача з правильними на теоретичному іспиті
+-- 18) РїРѕСЂС–РІРЅСЏС‚Рё РІС–РґРїРѕРІС–РґС– РІРєР°Р·Р°РЅРѕРіРѕ РєРѕСЂРёС‚СѓРІР°С‡Р° Р· РїСЂР°РІРёР»СЊРЅРёРјРё РЅР° С‚РµРѕСЂРµС‚РёС‡РЅРѕРјСѓ С–СЃРїРёС‚С–
 
 SELECT A.answerID, A.candidateAnswer, Q.correctAnswer FROM Answer A
 JOIN Question Q ON Q.questionID = A.questionID
@@ -185,7 +183,7 @@ JOIN Voucher V ON V.voucherID = E.voucherID
 JOIN Candidate C ON C.TIN = V.TIN
 WHERE C.TIN = 1234563456;
 
--- 19) порахувати суму оплат, зроблених у вказаному сервісному центрі у вказаний день
+-- 19) РїРѕСЂР°С…СѓРІР°С‚Рё СЃСѓРјСѓ РѕРїР»Р°С‚, Р·СЂРѕР±Р»РµРЅРёС… Сѓ РІРєР°Р·Р°РЅРѕРјСѓ СЃРµСЂРІС–СЃРЅРѕРјСѓ С†РµРЅС‚СЂС– Сѓ РІРєР°Р·Р°РЅРёР№ РґРµРЅСЊ
 
 SELECT SUM(payment + fee) AS TotalPayments, C.centerID, A.city
 FROM Voucher V
@@ -194,7 +192,7 @@ JOIN Address A ON A.addressID = C.addressID
 WHERE CAST(datetimeOfReciving AS DATE) = '2023-12-24' AND V.centerID = 4
 GROUP BY C.centerID, A.city;
 
--- 20) Підрахувати працівників, що займають посади 'Instructor' та 'Examiner'
+-- 20) РџС–РґСЂР°С…СѓРІР°С‚Рё РїСЂР°С†С–РІРЅРёРєС–РІ, С‰Рѕ Р·Р°Р№РјР°СЋС‚СЊ РїРѕСЃР°РґРё 'Instructor' С‚Р° 'Examiner'
 
 SELECT
     'Instructor' AS positionType,
@@ -213,7 +211,7 @@ WHERE
     positionID IN (SELECT positionID FROM Position WHERE positionName = 'Examiner');
 
 
--- 21) вибрати позицію з більшою середньою заробітною платою з позицій 'Instructor' та 'Examiner'
+-- 21) РІРёР±СЂР°С‚Рё РїРѕР·РёС†С–СЋ Р· Р±С–Р»СЊС€РѕСЋ СЃРµСЂРµРґРЅСЊРѕСЋ Р·Р°СЂРѕР±С–С‚РЅРѕСЋ РїР»Р°С‚РѕСЋ Р· РїРѕР·РёС†С–Р№ 'Instructor' С‚Р° 'Examiner'
 WITH InstructorAvg AS (
     SELECT AVG(salary) AS avgSalary
     FROM Position p
@@ -239,4 +237,15 @@ SELECT
         ELSE InstructorAvg.avgSalary 
     END AS HigherAvgSalary
 FROM InstructorAvg, ExaminerAvg; 
+
+--22) find category 
+
+
+DECLARE @CandidateTIN BIGINT = 5678111190;
+
+SELECT TOP 1 V.category
+FROM Voucher V
+JOIN Exam E ON V.voucherID = E.voucherID
+WHERE V.TIN = @CandidateTIN
+ORDER BY E.datetimeOfExam DESC;
 
